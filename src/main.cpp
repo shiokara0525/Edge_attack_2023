@@ -157,20 +157,6 @@ void loop() {
 
 
   if(A == 11){
-    float posvec_x,posvec_y;
-    float pos_x,pos_y;
-
-    if(cam_back.on == 1 && cam_front.on == 1){
-      posvec_x = cam_back.Size * cos(radians(180 + cam_back.ang)) + cam_front.Size * cos(radians(cam_front.ang));
-      posvec_y = cam_back.Size * sin(radians(180 + cam_back.ang)) + cam_front.Size * sin(radians(cam_front.ang));
-    }
-
-    Serial.print(" x : ");
-    Serial.print(posvec_x);
-    Serial.print(" y : ");
-    Serial.print(posvec_y);
-    AC_val = AC_ch();
-    
     A = 90;
 
     if(AC_F == 1){
