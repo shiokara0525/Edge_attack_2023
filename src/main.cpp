@@ -8,7 +8,7 @@
 
 BALL ball;
 int A = 0;
-int val = 160;
+int val = 170;
 AC ac;
 int LED = 13;
 
@@ -27,7 +27,7 @@ int Line_flag = 0;
 const int ang_180 = 210;
 const int ang_90 = 165;
 const int ang_30 = 75;
-const int ang_10 = 10;
+const int ang_10 = 5;
 int S_A = 0;
 int S_B = 999;
 timer S_t;
@@ -45,6 +45,7 @@ int AC_F;
 int cam_flag = 0;
 timer cam_T2;
 float AC_ch();
+int goal_color = 0; //青が0 黄色が1
 
 
 const int C = 32;
@@ -59,7 +60,14 @@ void setup() {
   cam_back.begin();
   cam_front.begin();
   ac.setup();
-  cam_front.color = 1;  //青が0 黄色が1
+  if(goal_color == 0){
+    cam_front.color = 0;  //青が0 黄色が1
+    cam_back.color = 1;  //青が0 黄色が1
+  }
+  else if(goal_color == 1){
+    cam_front.color = 1;  //青が0 黄色が1
+    cam_back.color = 0;  //青が0 黄色が1
+  }
 
   pinMode(K,OUTPUT);
   pinMode(C,OUTPUT);
@@ -73,7 +81,7 @@ void setup() {
 
 void loop() {
   angle go_ang(0,true);
-  int AC_val = AC_ch();
+  int AC_val = 100;
   int go_val = val;
 
   if(A == 0){
@@ -123,9 +131,8 @@ void loop() {
     int ang_90_ = ang_90;
     int ang_30_ = ang_30;
     int ang_10_ = ang_10;
-    S_A = 0;
 
-    if(ball.ball_get == 0 && (20 < abs(ball.ang) && abs(ball.ang) < 45)){
+    if(ball.ball_get == 0 && (25 < abs(ball.ang) && abs(ball.ang) < 45)){
       go_val = 120;
       ang_30_ = 90;
     }
@@ -143,26 +150,46 @@ void loop() {
     }
 
     if(AC_A == 1){
-      S_A = 1;
+      go_ang = 0;
     }
+    A = 11;
+  }
+
+
+  if(A == 11){
+    float posvec_x,posvec_y;
+    float pos_x,pos_y;
+
+    if(cam_back.on == 1 && cam_front.on == 1){
+      posvec_x = cam_back.Size * cos(radians(180 + cam_back.ang)) + cam_front.Size * cos(radians(cam_front.ang));
+      posvec_y = cam_back.Size * sin(radians(180 + cam_back.ang)) + cam_front.Size * sin(radians(cam_front.ang));
+    }
+
+    Serial.print(" x : ");
+    Serial.print(posvec_x);
+    Serial.print(" y : ");
+    Serial.print(posvec_y);
+    AC_val = AC_ch();
+    
+    A = 90;
 
     if(AC_F == 1){
-      go_val = 100;
+      go_val = 120;
     }
 
-    if(S_A == 0){
+    if(AC_A == 0){
       if(S_A != S_B){
         S_B = S_A;
         kick_flag = 0;
       }
     }
-    else if(S_A == 1){
+    else if(AC_A == 1){
       if(S_A != S_B){
         S_B = S_A;
         S_t.reset();
       }
-      if(abs(cam_front.ang) < 5){
-        if((kick_flag == 0 && 350 < S_t.read_ms()) || 45 < cam_front.Size){
+      if(abs(cam_front.ang) < 7){
+        if(kick_flag == 0 && 150 < S_t.read_ms()){
           kick();
           S_t.reset();
           kick_flag = 1;
@@ -170,11 +197,24 @@ void loop() {
         if(kick_flag == 1 && 500 < S_t.read_ms()){
           kick();
           S_t.reset();
-          k_t.reset();
         }
       }
     }
-    A = 90;
+  }
+
+
+  if(A == 15){
+    timer T;
+    T.reset();
+    while(abs(ball.ang) < 20){
+      float AC_V = AC_ch();
+      ball.getBallposition();
+      MOTOR.motor_ac(AC_V);
+      if(300 < T.read_ms()){
+        break;
+      }
+    }
+    A = 10;
   }
 
 
@@ -186,6 +226,7 @@ void loop() {
       line_B = line_A;
     }
     go_ang = line.decideGoang(line_ang,Line_flag);
+    AC_val = ac.getAC_val();
     A = 90;
   }
 
@@ -230,7 +271,12 @@ void loop() {
   if(A == 90){
     MOTOR.moveMotor_0(go_ang,go_val,AC_val,0);
 
+    // ball.print();
+    // Serial.print(" ");
+    // Serial.print(ball.ball_get);
     cam_front.print();
+    Serial.print(" ");
+    cam_back.print();
     Serial.println();
     A = 0;
   }
@@ -288,10 +334,10 @@ float AC_ch(){
       AC_val = ac.getAC_val();
     }
 
-    if(cam_T2.read_ms() < 200){
+    if(cam_T2.read_ms() < 150){
       AC_F = 1;
     }
-    MOTOR.Moutput(4,-150);
+    MOTOR.Moutput(4,-175);
   }
   return AC_val;
 }
@@ -339,7 +385,7 @@ void serialEvent3(){
       }
     }
   }
-  // Serial.println("sawa");
+  // Serial.print("sawa");
 }
 
 
