@@ -38,6 +38,7 @@ int toogle_P = 27;
 void Switch();
 
 Cam cam_front(4);
+int flag_cf = 0;
 Cam cam_back(3);
 int AC_A;
 int AC_B;
@@ -45,7 +46,7 @@ int AC_F;
 int cam_flag = 0;
 timer cam_T2;
 float AC_ch();
-int goal_color = 0; //青が0 黄色が1
+int goal_color = 1; //青が0 黄色が1
 
 
 const int C = 32;
@@ -73,6 +74,7 @@ void setup() {
   pinMode(C,OUTPUT);
   pinMode(LED,OUTPUT);
   digitalWrite(C,HIGH);
+  // MOTOR.Moutput(4,-175);
   digitalWrite(K,LOW);
   Switch();
 }
@@ -100,9 +102,11 @@ void loop() {
           if((60 < abs(ball.ang) && abs(ball.ang) < 120) && (cam_front.Size < 15 || 50 < cam_back.Size)){
             A = 40;
           }
-          // else if((45 < abs(ball.ang) && abs(ball.ang) < 75) && cam_back.on == 0){
-          //   A = 50;
-          // }
+        }
+        if(Line_flag == 1){
+          if(ball.ball_get == 1){
+            A = 41;
+          }            
         }
         line_B = line_A;
       }
@@ -157,10 +161,11 @@ void loop() {
 
 
   if(A == 11){
+    AC_val = AC_ch();
     A = 90;
 
     if(AC_F == 1){
-      go_val = 120;
+      go_val = 105;
     }
 
     if(AC_A == 0){
@@ -174,7 +179,7 @@ void loop() {
         S_B = S_A;
         S_t.reset();
       }
-      if(abs(cam_front.ang) < 7){
+      if(abs(cam_front.ang) < 5){
         if(kick_flag == 0 && 150 < S_t.read_ms()){
           kick();
           S_t.reset();
@@ -239,6 +244,25 @@ void loop() {
   }
 
 
+  if(A == 41){
+    timer Timer;
+    go_ang = 180;
+    MOTOR.motor_0();
+    MOTOR.Moutput(4,-200);
+    delay(300);
+    Timer.reset();
+    while(Timer.read_ms() < 1500){
+      MOTOR.moveMotor_0(go_ang,115,AC_ch(),1);
+      ball.ball_get = ball_get;
+      Serial.println(ball.ball_get);
+      if(line.getLINE_Vec(x,y,num)){
+        break;
+      }
+    }
+    A = 0;
+  }
+
+
   if(A == 50){
     while(45 < abs(ball.ang) && abs(ball.ang) < 75){
       ball.getBallposition();
@@ -262,7 +286,9 @@ void loop() {
     // Serial.print(ball.ball_get);
     cam_front.print();
     Serial.print(" ");
-    cam_back.print();
+    // cam_back.print();
+    Serial.print(" line : ");
+    Serial.print(Line_flag);
     Serial.println();
     A = 0;
   }
@@ -384,8 +410,8 @@ void serialEvent4(){
 
   for(int i = 0; i < 5; i++){
     reBuf[i] = Serial4.read();
-    // Serial.print(reBuf[i]);
-    // Serial.print(" ");
+    Serial.print(reBuf[i]);
+    Serial.print(" ");
   }
   while(Serial4.available()){
     Serial4.read();
@@ -401,9 +427,15 @@ void serialEvent4(){
         cam_front.Size = reBuf[3];
         cam_front.ang = -(reBuf[2] - 127);
       }
+      else{
+        cam_front.on = 0;
+      }
     }
   }
-  // Serial.println("sawa");
+  else{
+    flag_cf = 1;
+  }
+  Serial.println("sawa");
 }
 
 
