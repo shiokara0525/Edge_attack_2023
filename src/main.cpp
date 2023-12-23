@@ -138,7 +138,6 @@ void loop() {
 
     if(ball.ball_get == 0 && (25 < abs(ball.ang) && abs(ball.ang) < 45)){
       go_val = 120;
-      ang_30_ = 90;
     }
     if(abs(ball.ang) < 10){
       go_ang = ang_10 / 10.0 * ball.ang;
@@ -155,6 +154,7 @@ void loop() {
 
     if(AC_A == 1){
       go_ang = 0;
+      go_val += 5;
     }
     A = 11;
   }
@@ -179,8 +179,8 @@ void loop() {
         S_B = S_A;
         S_t.reset();
       }
-      if(abs(cam_front.ang) < 5){
-        if(kick_flag == 0 && 150 < S_t.read_ms()){
+      if(abs(cam_front.ang) < 6){
+        if(kick_flag == 0 && 250 < S_t.read_ms()){
           kick();
           S_t.reset();
           kick_flag = 1;
@@ -192,7 +192,6 @@ void loop() {
       }
     }
   }
-
 
   if(A == 15){
     timer T;
@@ -252,6 +251,7 @@ void loop() {
     delay(300);
     Timer.reset();
     while(Timer.read_ms() < 1500){
+      go_ang = 180 - ac.dir;
       MOTOR.moveMotor_0(go_ang,115,AC_ch(),1);
       ball.ball_get = ball_get;
       Serial.println(ball.ball_get);
@@ -259,6 +259,7 @@ void loop() {
         break;
       }
     }
+    S_t.reset();
     A = 0;
   }
 
@@ -283,12 +284,9 @@ void loop() {
 
     // ball.print();
     // Serial.print(" ");
-    // Serial.print(ball.ball_get);
+    // Serial.print(go_ang.degree);
+    // Serial.print(" ");
     cam_front.print();
-    Serial.print(" ");
-    // cam_back.print();
-    Serial.print(" line : ");
-    Serial.print(Line_flag);
     Serial.println();
     A = 0;
   }
@@ -410,8 +408,8 @@ void serialEvent4(){
 
   for(int i = 0; i < 5; i++){
     reBuf[i] = Serial4.read();
-    Serial.print(reBuf[i]);
-    Serial.print(" ");
+    // Serial.print(reBuf[i]);
+    // Serial.print(" ");
   }
   while(Serial4.available()){
     Serial4.read();
@@ -434,6 +432,10 @@ void serialEvent4(){
   }
   else{
     flag_cf = 1;
+  }
+  for(int i = 0; i < 5; i++){
+    Serial.print(reBuf[i]);
+    Serial.print(" ");
   }
   Serial.println("sawa");
 }
