@@ -15,10 +15,10 @@ Cam::Cam(int flag){
 
 void Cam::begin(){
     if(F == 3){
-        Serial3.begin(9600);
+        Serial3.begin(115200);
     }
     else if(F == 4){
-        Serial4.begin(9600);
+        Serial4.begin(115200);
     }
 }
 

@@ -389,9 +389,9 @@ void serialEvent3(){
     }
     else{
       if(cam_back.color == reBuf[1]){
-        cam_front.on = 1;
-        cam_front.Size = reBuf[3];
-        cam_front.ang = -(reBuf[2] - 127);
+        cam_back.on = 1;
+        cam_back.Size = reBuf[3];
+        cam_back.ang = -(reBuf[2] - 127);
       }
     }
   }
