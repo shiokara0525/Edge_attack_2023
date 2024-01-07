@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include<Servo.h>
 #include<Cam.h>
 #include<ac.h>
 #include<ball.h>
@@ -8,17 +9,25 @@
 
 BALL ball;
 int A = 0;
-int val = 170;
+int val = 160;
 AC ac;
 int LED = 13;
 
 motor_attack MOTOR;
+
+Servo esc;
+#define MAX_SIGNAL 2000  //PWM信号における最大のパルス幅[マイクロ秒]
+#define MIN_SIGNAL 1000  //PWM信号における最小のパルス幅[マイクロ秒]
+#define ESC_PIN 33  //ESCへの出力ピン
+float volume = 1100.0;  //可変抵抗の値を入れる変数
+char message[50];  //シリアルモニタへ表示する文字列を入れる変数
 
 LINE line;
 int x = 0;
 int y = 0;
 int num = 0;
 int ball_get;
+int l_s;
 
 int line_A = 0;
 int line_B = 999;
@@ -48,6 +57,9 @@ timer cam_T2;
 float AC_ch();
 int goal_color = 1; //青が0 黄色が1
 
+int dr_p = 33;
+void BLDC_begin();
+
 
 const int C = 32;
 const int K = 31;
@@ -61,6 +73,7 @@ void setup() {
   cam_back.begin();
   cam_front.begin();
   ac.setup();
+  pinMode(LED,OUTPUT);
   if(goal_color == 0){
     cam_front.color = 0;  //青が0 黄色が1
     cam_back.color = 1;  //青が0 黄色が1
@@ -69,14 +82,26 @@ void setup() {
     cam_front.color = 1;  //青が0 黄色が1
     cam_back.color = 0;  //青が0 黄色が1
   }
+  // esc.attach(ESC_PIN);  //ESCへの出力ピンをアタッチします
+  // Serial.println("Writing maximum output.");
+  // esc.writeMicroseconds(MAX_SIGNAL);  //ESCへ最大のパルス幅を指示します
+  // Serial.println("Wait 2 seconds.");
+  // digitalWrite(LED,HIGH);
+  // delay(2000);
+  // Serial.println("Writing minimum output");
+  // esc.writeMicroseconds(MIN_SIGNAL);  //ESCへ最小のパルス幅を指示します
+  // Serial.println("Wait 2 seconds. Then motor starts");
+  // digitalWrite(LED,LOW);
+  // delay(2000);
+  
 
   pinMode(K,OUTPUT);
   pinMode(C,OUTPUT);
-  pinMode(LED,OUTPUT);
   digitalWrite(C,HIGH);
   // MOTOR.Moutput(4,-175);
   digitalWrite(K,LOW);
   Switch();
+  // esc.writeMicroseconds(1150);
 }
 
 
@@ -105,7 +130,7 @@ void loop() {
         }
         if(Line_flag == 1){
           if(ball.ball_get == 1){
-            A = 41;
+            // A = 41;
           }            
         }
         line_B = line_A;
@@ -213,6 +238,8 @@ void loop() {
     angle line_ang(line.ang,true);
     if(line_A != line_B){
       Line_flag = line.switchLineflag(line_ang);
+      MOTOR.motor_0();
+      delay(50);
       line_B = line_A;
     }
     go_ang = line.decideGoang(line_ang,Line_flag);
@@ -247,7 +274,7 @@ void loop() {
     timer Timer;
     go_ang = 180;
     MOTOR.motor_0();
-    MOTOR.Moutput(4,-200);
+    // MOTOR.Moutput(4,-200);
     delay(300);
     Timer.reset();
     while(Timer.read_ms() < 1500){
@@ -280,13 +307,16 @@ void loop() {
 
 
   if(A == 90){
-    MOTOR.moveMotor_0(go_ang,go_val,AC_val,0);
-
-    // ball.print();
+    // MOTOR.moveMotor_0(go_ang,go_val,AC_val,0);
+    ball.print();
+    // ac.print();
     // Serial.print(" ");
     // Serial.print(go_ang.degree);
     // Serial.print(" ");
-    cam_front.print();
+    // cam_front.print();
+    // Serial.print(" b_c : ");
+    // Serial.print(ball_get);
+    line.print();
     Serial.println();
     A = 0;
   }
@@ -347,7 +377,7 @@ float AC_ch(){
     if(cam_T2.read_ms() < 150){
       AC_F = 1;
     }
-    MOTOR.Moutput(4,-175);
+    // MOTOR.Moutput(4,-175);
   }
   return AC_val;
 }
@@ -366,6 +396,28 @@ void kick(){
   digitalWrite(C,HIGH);
   // MOTOR.Moutput(4,-200);
 }
+
+
+void BLDC_begin(){
+  // esc.attach(ESC_PIN);  //ESCへの出力ピンをアタッチします
+  // Serial.println("Writing maximum output.");
+  // esc.writeMicroseconds(MAX_SIGNAL);  //ESCへ最大のパルス幅を指示します
+  // Serial.println("Wait 2 seconds.");
+  // digitalWrite(LED,HIGH);
+  // delay(2000);
+  // Serial.println("Writing minimum output");
+  // esc.writeMicroseconds(MIN_SIGNAL);  //ESCへ最小のパルス幅を指示します
+  // Serial.println("Wait 2 seconds. Then motor starts");
+  // digitalWrite(LED,LOW);
+  // delay(2000);
+}
+
+
+
+void BLDC_work(){
+  // esc.writeMicroseconds(volume);
+}
+
 
 
 void serialEvent3(){
@@ -434,20 +486,17 @@ void serialEvent4(){
     flag_cf = 1;
   }
   for(int i = 0; i < 5; i++){
-    Serial.print(reBuf[i]);
-    Serial.print(" ");
   }
-  Serial.println("sawa");
 }
 
 
 
 void serialEvent6(){
   // Serial.print("sawa");
-  uint8_t read[7];
+  uint8_t read[8];
   word contain[4];
   int n = 1;
-  if(Serial6.available() < 7){
+  if(Serial6.available() < 8){
     return;
   }
   read[0] = Serial6.read();
@@ -455,7 +504,7 @@ void serialEvent6(){
     return;
   } 
   while(0 < Serial6.available()){
-    if(n < 7){
+    if(n < 8){
       read[n] = Serial6.read();
     }
     else{
@@ -464,7 +513,7 @@ void serialEvent6(){
     n++;
   }
 
-  if(read[0] == 38 && read[6] == 37){
+  if(read[0] == 38 && read[7] == 37){
     contain[0] = (uint16_t(read[1]) << 8);
     contain[1] = (uint16_t(read[2]));
     x = int16_t(contain[0] | contain[1]);
@@ -472,6 +521,8 @@ void serialEvent6(){
     contain[3] = (uint16_t(read[4]));
     y = int16_t(contain[2] | contain[3]);
     num = read[5];
+    l_s = read[6];
+
     x *= -1;
     y *= -1;
     // Serial.print(" x  : ");
@@ -485,10 +536,10 @@ void serialEvent6(){
   else{
     // Serial.print(" Error!! ");
   }
-  for(int i = 0; i < 7; i++){
-    // Serial.print(read[i]);
-    // Serial.print(" ");
-  }
+  // for(int i = 0; i < 8; i++){
+  //   Serial.print(read[i]);
+  //   Serial.print(" ");
+  // }
   // Serial.println();
 }
 

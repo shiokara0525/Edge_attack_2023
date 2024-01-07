@@ -19,6 +19,7 @@ public:
     float dis_X;
     float dis_Y;
     int num;
+    int flag;
  
     int LINE_on; //ラインがロボットの下になかったら0,あったら1にする
     int line_flag = 0;

@@ -18,6 +18,25 @@ int LINE::getLINE_Vec(float x, float y, int num) { //ラインのベクトル(�
   this->ang = degrees(atan2(y,x));
   this->num = num;
 
+  // if(line_sub == 0){
+  //   flag = 0;
+  // }
+  // else if(line_sub == 1){
+  //   flag = 1;
+  // }
+  // else if(line_sub == 2){
+  //   flag = 2;
+  // }
+  // else if(line_sub == 3){
+  //   flag = 3; //後ろ
+  // }
+  // else if(line_sub == 4){
+  //   flag = 3;
+  // }
+  // else{
+  //   flag = 3;
+  // }
+    
   if(num == 0){
     LINE_on = 0;
   }
