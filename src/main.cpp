@@ -9,18 +9,19 @@
 
 BALL ball;
 int A = 0;
-int val = 160;
+int val = 175;
 AC ac;
 int LED = 13;
 
 motor_attack MOTOR;
 
-Servo esc;
-#define MAX_SIGNAL 2000  //PWM信号における最大のパルス幅[マイクロ秒]
-#define MIN_SIGNAL 1000  //PWM信号における最小のパルス幅[マイクロ秒]
-#define ESC_PIN 33  //ESCへの出力ピン
-float volume = 1100.0;  //可変抵抗の値を入れる変数
-char message[50];  //シリアルモニタへ表示する文字列を入れる変数
+// Servo esc;
+// #define MAX_SIGNAL 2000  //PWM信号における最大のパルス幅[マイクロ秒]
+// #define MIN_SIGNAL 1000  //PWM信号における最小のパルス幅[マイクロ秒]
+// #define ESC_PIN 33  //ESCへの出力ピン
+// float volume = 1100.0;  //可変抵抗の値を入れる変数
+// char message[50];  //シリアルモニタへ表示する文字列を入れる変数
+// void BLDC_work();
 
 LINE line;
 int x = 0;
@@ -33,10 +34,10 @@ int line_A = 0;
 int line_B = 999;
 int Line_flag = 0;
 
-const int ang_180 = 210;
-const int ang_90 = 165;
-const int ang_30 = 75;
-const int ang_10 = 5;
+const int ang_180 = 230;
+const int ang_90 = 160;
+const int ang_30 = 90;
+const int ang_10 = 10;
 int S_A = 0;
 int S_B = 999;
 timer S_t;
@@ -54,8 +55,9 @@ int AC_B;
 int AC_F;
 int cam_flag = 0;
 timer cam_T2;
+
 float AC_ch();
-int goal_color = 1; //青が0 黄色が1
+int goal_color = 0; //青が0 黄色が1
 
 int dr_p = 33;
 void BLDC_begin();
@@ -101,7 +103,6 @@ void setup() {
   // MOTOR.Moutput(4,-175);
   digitalWrite(K,LOW);
   Switch();
-  // esc.writeMicroseconds(1150);
 }
 
 
@@ -177,44 +178,40 @@ void loop() {
       go_ang = ((ang_180_ - ang_90_) / 90.0 * (abs(ball.ang) - 90) + ang_90_) * ball.ang / abs(ball.ang);
     }
 
-    if(AC_A == 1){
-      go_ang = 0;
-      go_val += 5;
-    }
-    A = 11;
-  }
-
-
-  if(A == 11){
-    AC_val = AC_ch();
-    A = 90;
-
-    if(AC_F == 1){
-      go_val = 105;
-    }
-
-    if(AC_A == 0){
-      if(S_A != S_B){
-        S_B = S_A;
-        kick_flag = 0;
-      }
-    }
-    else if(AC_A == 1){
+    if(ball_get == 1 && abs(ball.ang) < 20){
+      S_A = 1;
       if(S_A != S_B){
         S_B = S_A;
         S_t.reset();
       }
-      if(abs(cam_front.ang) < 6){
-        if(kick_flag == 0 && 250 < S_t.read_ms()){
-          kick();
-          S_t.reset();
-          kick_flag = 1;
-        }
-        if(kick_flag == 1 && 500 < S_t.read_ms()){
-          kick();
-          S_t.reset();
-        }
+      A = 11;
+      AC_val = AC_ch();
+    }
+    else{
+      S_A = 0;
+      if(S_A != S_B){
+        S_B = S_A;
       }
+      A = 90;
+      AC_val = ac.getAC_val();
+    }
+  }
+
+
+  if(A == 11){
+    A = 90;
+    go_ang = 0;
+    go_val = 150;
+    Serial.print(" time : ");
+    Serial.print(S_t.read_ms());
+    if(kick_flag == 0 && 300 < S_t.read_ms() && ball_get == 1){
+      kick();
+      S_t.reset();
+      kick_flag = 1;
+    }
+    if(kick_flag == 1 && 500 < S_t.read_ms() && ball_get == 1){
+      kick();
+      S_t.reset();
     }
   }
 
@@ -274,7 +271,6 @@ void loop() {
     timer Timer;
     go_ang = 180;
     MOTOR.motor_0();
-    // MOTOR.Moutput(4,-200);
     delay(300);
     Timer.reset();
     while(Timer.read_ms() < 1500){
@@ -307,23 +303,25 @@ void loop() {
 
 
   if(A == 90){
-    // MOTOR.moveMotor_0(go_ang,go_val,AC_val,0);
-    ball.print();
+    MOTOR.moveMotor_0(go_ang,go_val,AC_val,0);
+    // ball.print();
     // ac.print();
     // Serial.print(" ");
     // Serial.print(go_ang.degree);
     // Serial.print(" ");
-    // cam_front.print();
+    cam_front.print();
     // Serial.print(" b_c : ");
     // Serial.print(ball_get);
     line.print();
+    Serial.print(" go_ang : ");
+    Serial.print(go_ang.degree);
     Serial.println();
     A = 0;
   }
 
   if(toogle_f != digitalRead(toogle_P)){
     MOTOR.motor_0();
-    MOTOR.Moutput(4,0);
+    // esc.writeMicroseconds(1000);
     Switch();
     A = 0;
   }
@@ -350,8 +348,15 @@ float AC_ch(){
   AC_A = 0;
   AC_F = 0;
   cam_flag = cam_front.on;
-  if(ball.ball_get == 1){
-    AC_A = 1;
+  if(AC_B == 1){
+    if(abs(ball.ang) < 50){
+      AC_A = 1;
+    }
+  }
+  else if(AC_B == 0){
+    if(abs(ball.ang) < 20){
+      AC_A = 1;
+    }
   }
 
 
@@ -369,6 +374,9 @@ float AC_ch(){
     }
     if(cam_flag == 1){
       AC_val = ac.getCam_val(cam_front.ang);
+      // Serial.print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+      // cam_front.begin();
+      // Serial.println();
     }
     else{
       AC_val = ac.getAC_val();
@@ -377,14 +385,13 @@ float AC_ch(){
     if(cam_T2.read_ms() < 150){
       AC_F = 1;
     }
-    // MOTOR.Moutput(4,-175);
   }
   return AC_val;
 }
 
 
 void kick(){
-  MOTOR.Moutput(4,0);
+  // esc.writeMicroseconds(1000);
   digitalWrite(C,LOW);
   delay(10);
   digitalWrite(K,HIGH);
@@ -415,7 +422,7 @@ void BLDC_begin(){
 
 
 void BLDC_work(){
-  // esc.writeMicroseconds(volume);
+  // esc.writeMicroseconds(1150);
 }
 
 
@@ -486,7 +493,10 @@ void serialEvent4(){
     flag_cf = 1;
   }
   for(int i = 0; i < 5; i++){
+    Serial.print(" ");
+    Serial.print(reBuf[i]);
   }
+  Serial.println();
 }
 
 
