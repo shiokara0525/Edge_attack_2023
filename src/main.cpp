@@ -11,7 +11,7 @@ BALL ball;
 int A = 0;
 int B = 999;
 timer Timer;
-int val = 175;
+int val = 150;
 AC ac;
 int LED = 13;
 
@@ -96,6 +96,7 @@ void loop() {
   ball.ball_get = ball_get;
   int C = 0;
   int motor_flag = 1;
+  int AC_flag = 1; // 1は角度で制御 0はカメラで制御
   if(A == 40 || A == 41){
     C = 1;
   }
@@ -177,7 +178,7 @@ void loop() {
       go_ang = ang_10 / 10.0 * ball.ang;
     }
     else if(abs(ball.ang) < 30){
-      go_ang = ((ang_30_ - ang_10_) / 20.0 * (abs(ball.ang) - 10) + ang_10_)  * ball.ang / abs(ball.ang);
+      go_ang = ((ang_30_ - ang_10_) / 20.0 * (abs(ball.ang) - 10) + ang_10_) * ball.ang / abs(ball.ang);
     }
     else if(abs(ball.ang) < 90){
       go_ang = ((ang_90_ - ang_30_) / 60.0 * (abs(ball.ang) - 30) + ang_30_) * ball.ang / abs(ball.ang);
@@ -193,8 +194,7 @@ void loop() {
       B = A;
       Timer.reset();
     }
-    AC_val = ac.getCam_val(cam_front.ang);
-    A = 90;
+    AC_flag = 0;
     go_ang = 0;
     go_val = 150;
     if(kick_flag == 0 && 300 < Timer.read_ms() && ball.ball_get == 1){
@@ -218,7 +218,6 @@ void loop() {
       delay(50);
     }
     go_ang = line.decideGoang(line_ang,Line_flag);
-    AC_val = ac.getAC_val();
   }
 
 
@@ -248,10 +247,29 @@ void loop() {
     }
   }
 
+  if(AC_flag == 1){
+    AC_val = ac.getAC_val();
+  }
+  else{
+    if(cam_front.on == 1){
+      AC_val = ac.getCam_val(cam_front.ang);
+      MOTOR.motor_ac(AC_val);
+    }
+    else{
+      AC_val = ac.getAC_val();
+    }
+  }
+
   if(motor_flag == 1){
     MOTOR.moveMotor_0(go_ang,go_val,AC_val,0);
   }
-  line.print();
+  // Serial.print(" A : ");
+  // Serial.print(A);
+  // Serial.print(" AC : ");
+  // Serial.print(AC_val);
+  // line.print();
+  // cam_front.print();
+  // ball.print();
   Serial.println();
 
   if(toogle_f != digitalRead(toogle_P)){

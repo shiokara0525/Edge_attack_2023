@@ -3,7 +3,7 @@
 BALL::BALL(){
     ball_x.setLenth(3);
     ball_y.setLenth(3);
-    far__.setLenth(1000);
+    far__.setLenth(500);
 }
 
 
@@ -56,7 +56,7 @@ void BALL::print(){
     Serial.print(" ang : ");
     Serial.print(ang);
     Serial.print(" far : ");
-    Serial.print(far);
+    Serial.print(far_);
     Serial.print(" x : ");
     Serial.print(x_pos);
     Serial.print(" y : ");
