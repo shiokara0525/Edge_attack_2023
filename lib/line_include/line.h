@@ -7,7 +7,7 @@
 
 class LINE{
 public:
-    int getLINE_Vec(float,float,int); //ラインセンサのベクトル(距離,角度)を取得する関数
+    int getLINE_Vec(); //ラインセンサのベクトル(距離,角度)を取得する関数
     int switchLineflag(angle);
     float decideGoang(angle,int);
     void print();
@@ -20,6 +20,10 @@ public:
     float dis_Y;
     int num;
     int flag;
+    int data_on[27];
+    uint8_t data_byte[4];
+    double ele_X[27]; //ラインセンサのX座標
+    double ele_Y[27]; //ラインセンサのY座標
  
     int LINE_on; //ラインがロボットの下になかったら0,あったら1にする
     int line_flag = 0;

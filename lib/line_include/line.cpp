@@ -3,40 +3,85 @@
 
 
 LINE::LINE(){
-  // Serial6.begin(9600);
 }
 
 void LINE::begin(){
   Serial6.begin(57600);
+  for(int i = 0; i < 24; i++){
+    ele_Y[i] = sin(radians(15 * i));
+    ele_X[i] = cos(radians(15 * i));
+  }
 }
 
 
-int LINE::getLINE_Vec(float x, float y, int num) { //ラインのベクトル(距離,角度)を取得する関数
-  this->dis_X = float(x / 100.0);
-  this->dis_Y = float(y / 100.0);
-  this->dis = sqrt(x*x+y*y);
-  this->ang = degrees(atan2(y,x));
-  this->num = num;
+int LINE::getLINE_Vec() { //ラインのベクトル(距離,角度)を取得する関数
+  float X = 0;
+  float Y = 0;
+  uint8_t Line_byte[4] = {data_byte[0],data_byte[1],data_byte[2],data_byte[3]};
 
-  // if(line_sub == 0){
-  //   flag = 0;
-  // }
-  // else if(line_sub == 1){
-  //   flag = 1;
-  // }
-  // else if(line_sub == 2){
-  //   flag = 2;
-  // }
-  // else if(line_sub == 3){
-  //   flag = 3; //後ろ
-  // }
-  // else if(line_sub == 4){
-  //   flag = 3;
-  // }
-  // else{
-  //   flag = 3;
-  // }
-    
+  int flag = 0;
+  int block_first[Long];
+  int block_last[Long];
+  int block_num = -1;
+  float block_X[Long];
+  float block_Y[Long];
+
+  for(int i = 0; i < 4; i++){
+    for(int j = 0; j < 8; j++){
+      data_on[i * 8 + j] = Line_byte[i] % 2;
+      Line_byte[i] /= 2;
+      if(i == 3 && 2 <= j){
+        break;
+      }
+    }
+  }
+  for(int i = 0; i < 24; i++){
+    // Serial.print(" ");
+    // Serial.print(data_on[i]);
+    if(2 <= i && i <= 4){
+      continue;
+    }
+    if(flag == 0){
+      if(data_on[i] == 1){
+        block_num++;
+        block_first[block_num] = i;
+        flag = 1;
+      }
+    }
+    else{
+      if(data_on[i] == 0){
+        block_last[block_num] = i - 1;
+        flag = 0;
+      }
+    }
+
+    if(i == 23){
+      if(data_on[23] == 1 && data_on[0] == 1){
+        block_first[0] = block_first[block_num];
+        block_first[block_num] = 0;
+        block_num--;
+      }
+
+      if(data_on[23] == 1 && data_on[0] == 0){
+        block_last[block_num] = 23;
+      }
+    }
+  }
+
+  for(int i = 0; i <= block_num; i++){
+    block_X[i] = ele_X[block_first[i]] + ele_X[block_last[i]];
+    block_Y[i] = ele_Y[block_first[i]] + ele_Y[block_last[i]];
+    X += block_X[i];
+    Y += block_Y[i];
+  }
+  block_num++;
+
+  X /= block_num;
+  Y /= block_num;
+  dis_X = -X;
+  dis_Y = -Y;
+  num = block_num;
+  ang = degrees(atan2(dis_Y,dis_X));
   if(num == 0){
     LINE_on = 0;
   }

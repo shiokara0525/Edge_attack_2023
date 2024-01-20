@@ -9,6 +9,8 @@
 
 BALL ball;
 int A = 0;
+int B = 999;
+timer Timer;
 int val = 175;
 AC ac;
 int LED = 13;
@@ -22,13 +24,13 @@ motor_attack MOTOR;
 // float volume = 1100.0;  //可変抵抗の値を入れる変数
 // char message[50];  //シリアルモニタへ表示する文字列を入れる変数
 // void BLDC_work();
+// void BLDC_begin();
 
 LINE line;
 int x = 0;
 int y = 0;
 int num = 0;
 int ball_get;
-int l_s;
 
 int line_A = 0;
 int line_B = 999;
@@ -38,29 +40,18 @@ const int ang_180 = 230;
 const int ang_90 = 160;
 const int ang_30 = 90;
 const int ang_10 = 10;
-int S_A = 0;
-int S_B = 999;
-timer S_t;
-timer k_t;
 
 int toogle_f;
 int toogle_P = 27;
 void Switch();
 
 Cam cam_front(4);
-int flag_cf = 0;
 Cam cam_back(3);
-int AC_A;
-int AC_B;
-int AC_F;
 int cam_flag = 0;
-timer cam_T2;
 
-float AC_ch();
 int goal_color = 0; //青が0 黄色が1
 
 int dr_p = 33;
-void BLDC_begin();
 
 
 const int C = 32;
@@ -84,18 +75,6 @@ void setup() {
     cam_front.color = 1;  //青が0 黄色が1
     cam_back.color = 0;  //青が0 黄色が1
   }
-  // esc.attach(ESC_PIN);  //ESCへの出力ピンをアタッチします
-  // Serial.println("Writing maximum output.");
-  // esc.writeMicroseconds(MAX_SIGNAL);  //ESCへ最大のパルス幅を指示します
-  // Serial.println("Wait 2 seconds.");
-  // digitalWrite(LED,HIGH);
-  // delay(2000);
-  // Serial.println("Writing minimum output");
-  // esc.writeMicroseconds(MIN_SIGNAL);  //ESCへ最小のパルス幅を指示します
-  // Serial.println("Wait 2 seconds. Then motor starts");
-  // digitalWrite(LED,LOW);
-  // delay(2000);
-  
 
   pinMode(K,OUTPUT);
   pinMode(C,OUTPUT);
@@ -109,20 +88,54 @@ void setup() {
 
 void loop() {
   angle go_ang(0,true);
-  int AC_val = 100;
+  int AC_val = ac.getAC_val();
   int go_val = val;
 
-  if(A == 0){
-    ball.getBallposition();
-    line.getLINE_Vec(x,y,num);
-    ball.ball_get = ball_get;
+  ball.getBallposition();
+  line.getLINE_Vec();
+  ball.ball_get = ball_get;
+  int C = 0;
+  int motor_flag = 1;
+  if(A == 40 || A == 41){
+    C = 1;
+  }
+
+  if(C == 1){
+    if(A == 40){
+      if(abs(ball.ang) < 30 || 150 < abs(ball.ang) || line.LINE_on == 1){
+        C = 0;
+      }
+    }
+    else if(A == 41){
+      if(1500 < Timer.read_ms() || line.LINE_on == 1){
+        C = 0;
+      }
+    }
+  }
+
+  if(C == 0){
     if(line.LINE_on){
       A = 20;
       line_A = 1;
+      if(line_A != line_B){
+        line_B = line_A;
+      }
     }
     else{
       A = 10;
       line_A = 0;
+      if(ball.flag == 1){
+        if(ball.ball_get == 1 && abs(ball.ang) < 10){
+          A = 11;
+        }
+        else{
+          A = 10;
+        }
+      }
+      else{
+        A = 5;
+      }
+
       if(line_A != line_B){
         if(Line_flag == 3){
           if((60 < abs(ball.ang) && abs(ball.ang) < 120) && (cam_front.Size < 15 || 50 < cam_back.Size)){
@@ -132,31 +145,26 @@ void loop() {
         if(Line_flag == 1){
           if(ball.ball_get == 1){
             // A = 41;
-          }            
+          }
         }
         line_B = line_A;
-      }
-      if(ball.flag == 0){
-        A = 5;
       }
     }
   }
 
   if(A == 5){
     MOTOR.motor_0();
-    while(ball.flag == 0){
-      ball.getBallposition();
-      digitalWrite(LED,HIGH);
-      delay(100);
-      digitalWrite(LED,LOW);
-      delay(100);
-      ball.print();
-      Serial.println();
-    }
-    A = 0;
+    ball.getBallposition();
+    digitalWrite(LED,HIGH);
+    delay(100);
+    digitalWrite(LED,LOW);
+    delay(100);
   }
 
   if(A == 10){
+    if(A != B){
+      B = A;
+    }
     int ang_180_ = ang_180;
     int ang_90_ = ang_90;
     int ang_30_ = ang_30;
@@ -177,151 +185,77 @@ void loop() {
     else{
       go_ang = ((ang_180_ - ang_90_) / 90.0 * (abs(ball.ang) - 90) + ang_90_) * ball.ang / abs(ball.ang);
     }
-
-    if(ball_get == 1 && abs(ball.ang) < 20){
-      S_A = 1;
-      if(S_A != S_B){
-        S_B = S_A;
-        S_t.reset();
-      }
-      A = 11;
-      AC_val = AC_ch();
-    }
-    else{
-      S_A = 0;
-      if(S_A != S_B){
-        S_B = S_A;
-      }
-      A = 90;
-      AC_val = ac.getAC_val();
-    }
   }
 
 
   if(A == 11){
+    if(A != B){
+      B = A;
+      Timer.reset();
+    }
+    AC_val = ac.getCam_val(cam_front.ang);
     A = 90;
     go_ang = 0;
     go_val = 150;
-    Serial.print(" time : ");
-    Serial.print(S_t.read_ms());
-    if(kick_flag == 0 && 300 < S_t.read_ms() && ball_get == 1){
+    if(kick_flag == 0 && 300 < Timer.read_ms() && ball.ball_get == 1){
       kick();
-      S_t.reset();
+      Timer.reset();
       kick_flag = 1;
     }
-    if(kick_flag == 1 && 500 < S_t.read_ms() && ball_get == 1){
+    if(kick_flag == 1 && 500 < Timer.read_ms() && ball.ball_get == 1){
       kick();
-      S_t.reset();
+      Timer.reset();
     }
   }
-
-  if(A == 15){
-    timer T;
-    T.reset();
-    while(abs(ball.ang) < 20){
-      float AC_V = AC_ch();
-      ball.getBallposition();
-      MOTOR.motor_ac(AC_V);
-      if(300 < T.read_ms()){
-        break;
-      }
-    }
-    A = 10;
-  }
-
 
 
   if(A == 20){
     angle line_ang(line.ang,true);
-    if(line_A != line_B){
+    if(A != B){
+      B = A;
       Line_flag = line.switchLineflag(line_ang);
       MOTOR.motor_0();
       delay(50);
-      line_B = line_A;
     }
     go_ang = line.decideGoang(line_ang,Line_flag);
     AC_val = ac.getAC_val();
-    A = 90;
   }
 
 
-  if(A == 40){
-    while(30 < abs(ball.ang) && abs(ball.ang) < 150){
-      ball.getBallposition();
-      AC_val = ac.getAC_val();
-      if(ball.ang < 0){
-        go_ang = -90;
-      }
-      else{
-        go_ang = 90;
-      }
-      ball.print();
-      Serial.println(line.LINE_on);
-      MOTOR.moveMotor_0(go_ang,go_val,AC_val,0);
-
-      if(line.getLINE_Vec(x,y,num) == 1){
-        break;
-      }
+  if(A == 40){ //ラインが後ろにある時、横にびゃーっていくやつ
+    if(A != B){
+      B = A;
     }
-    A = 0;
+    if(ball.ang < 0){
+      go_ang = -90;
+    }
+    else{
+      go_ang = 90;
+    }
   }
 
 
-  if(A == 41){
-    timer Timer;
-    go_ang = 180;
-    MOTOR.motor_0();
-    delay(300);
-    Timer.reset();
-    while(Timer.read_ms() < 1500){
+  if(A == 41){  //後ろ行ってぽん
+    if(A != B){
+      B = A;
+      Timer.reset();
+    }
+    if(Timer.read_ms() < 300){
+      motor_flag = 0;
+    }
+    else{
       go_ang = 180 - ac.dir;
-      MOTOR.moveMotor_0(go_ang,115,AC_ch(),1);
-      ball.ball_get = ball_get;
-      Serial.println(ball.ball_get);
-      if(line.getLINE_Vec(x,y,num)){
-        break;
-      }
     }
-    S_t.reset();
-    A = 0;
   }
 
-
-  if(A == 50){
-    while(45 < abs(ball.ang) && abs(ball.ang) < 75){
-      ball.getBallposition();
-      AC_val = ac.getAC_val();
-      go_ang = 0;
-      MOTOR.moveMotor_0(go_ang,go_val,AC_val,0);
-      delay(500);
-      if(line.getLINE_Vec(x,y,num) == 1){
-        break;
-      }
-    }
-    A = 0;
-  }
-
-
-  if(A == 90){
+  if(motor_flag == 1){
     MOTOR.moveMotor_0(go_ang,go_val,AC_val,0);
-    // ball.print();
-    // ac.print();
-    // Serial.print(" ");
-    // Serial.print(go_ang.degree);
-    // Serial.print(" ");
-    cam_front.print();
-    // Serial.print(" b_c : ");
-    // Serial.print(ball_get);
-    line.print();
-    Serial.print(" go_ang : ");
-    Serial.print(go_ang.degree);
-    Serial.println();
-    A = 0;
   }
+  line.print();
+  Serial.println();
 
   if(toogle_f != digitalRead(toogle_P)){
     MOTOR.motor_0();
-    // esc.writeMicroseconds(1000);
     Switch();
     A = 0;
   }
@@ -331,6 +265,7 @@ void loop() {
 void Switch(){
   digitalWrite(LED,HIGH);
   toogle_f = digitalRead(toogle_P);
+  delay(100);
   while(digitalRead(toogle_P) == toogle_f);
   digitalWrite(LED,LOW);
   ac.setup_2();
@@ -338,55 +273,6 @@ void Switch(){
   delay(100);
   while(digitalRead(toogle_P) == toogle_f);
   toogle_f = digitalRead(toogle_P);
-}
-
-
-float AC_ch(){
-  float AC_val = 0;
-  angle ball_(ball.ang + ac.dir,true);
-  ball_.to_range(180,true);
-  AC_A = 0;
-  AC_F = 0;
-  cam_flag = cam_front.on;
-  if(AC_B == 1){
-    if(abs(ball.ang) < 50){
-      AC_A = 1;
-    }
-  }
-  else if(AC_B == 0){
-    if(abs(ball.ang) < 20){
-      AC_A = 1;
-    }
-  }
-
-
-  if(AC_A == 0){
-    if(AC_A != AC_B){
-      AC_B = AC_A;
-      MOTOR.Moutput(4,0);
-    }
-    AC_val = ac.getAC_val();
-  }
-  else if(AC_A == 1){
-    if(AC_A != AC_B){
-      AC_B = AC_A;
-      cam_T2.reset();
-    }
-    if(cam_flag == 1){
-      AC_val = ac.getCam_val(cam_front.ang);
-      // Serial.print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-      // cam_front.begin();
-      // Serial.println();
-    }
-    else{
-      AC_val = ac.getAC_val();
-    }
-
-    if(cam_T2.read_ms() < 150){
-      AC_F = 1;
-    }
-  }
-  return AC_val;
 }
 
 
@@ -407,14 +293,10 @@ void kick(){
 
 void BLDC_begin(){
   // esc.attach(ESC_PIN);  //ESCへの出力ピンをアタッチします
-  // Serial.println("Writing maximum output.");
   // esc.writeMicroseconds(MAX_SIGNAL);  //ESCへ最大のパルス幅を指示します
-  // Serial.println("Wait 2 seconds.");
   // digitalWrite(LED,HIGH);
   // delay(2000);
-  // Serial.println("Writing minimum output");
   // esc.writeMicroseconds(MIN_SIGNAL);  //ESCへ最小のパルス幅を指示します
-  // Serial.println("Wait 2 seconds. Then motor starts");
   // digitalWrite(LED,LOW);
   // delay(2000);
 }
@@ -435,8 +317,6 @@ void serialEvent3(){
 
   for(int i = 0; i < 5; i++){
     reBuf[i] = Serial3.read();
-    // Serial.print(reBuf[i]);
-    // Serial.print(" ");
   }
   while(Serial3.available()){
     Serial3.read();
@@ -467,8 +347,6 @@ void serialEvent4(){
 
   for(int i = 0; i < 5; i++){
     reBuf[i] = Serial4.read();
-    // Serial.print(reBuf[i]);
-    // Serial.print(" ");
   }
   while(Serial4.available()){
     Serial4.read();
@@ -490,23 +368,16 @@ void serialEvent4(){
     }
   }
   else{
-    flag_cf = 1;
   }
-  for(int i = 0; i < 5; i++){
-    Serial.print(" ");
-    Serial.print(reBuf[i]);
-  }
-  Serial.println();
 }
 
 
 
 void serialEvent6(){
-  // Serial.print("sawa");
-  uint8_t read[8];
-  word contain[4];
+  // Serial.print(" sawa ");
+  uint8_t read[6];
   int n = 1;
-  if(Serial6.available() < 8){
+  if(Serial6.available() < 6){
     return;
   }
   read[0] = Serial6.read();
@@ -514,7 +385,7 @@ void serialEvent6(){
     return;
   } 
   while(0 < Serial6.available()){
-    if(n < 8){
+    if(n < 6){
       read[n] = Serial6.read();
     }
     else{
@@ -523,30 +394,16 @@ void serialEvent6(){
     n++;
   }
 
-  if(read[0] == 38 && read[7] == 37){
-    contain[0] = (uint16_t(read[1]) << 8);
-    contain[1] = (uint16_t(read[2]));
-    x = int16_t(contain[0] | contain[1]);
-    contain[2] = (uint16_t(read[3]) << 8);
-    contain[3] = (uint16_t(read[4]));
-    y = int16_t(contain[2] | contain[3]);
-    num = read[5];
-    l_s = read[6];
-
-    x *= -1;
-    y *= -1;
-    // Serial.print(" x  : ");
-    // Serial.print(x);
-    // Serial.print(" y : ");
-    // Serial.print(y);
-    // Serial.print(" ang : ");
-    // Serial.print(degrees(atan2(y,x)));
-    // Serial.print(" | ");
+  if(read[0] == 38 && read[5] == 37){
+    line.data_byte[0] = read[1];
+    line.data_byte[1] = read[2];
+    line.data_byte[2] = read[3];
+    line.data_byte[3] = read[4];
   }
   else{
     // Serial.print(" Error!! ");
   }
-  // for(int i = 0; i < 8; i++){
+  // for(int i = 0; i < 6; i++){
   //   Serial.print(read[i]);
   //   Serial.print(" ");
   // }
@@ -560,11 +417,9 @@ void serialEvent8(){
   int x,y;
   word revBuf_word[7];
   byte revBuf_byte[7];
-  // Serial.print("sawa");
   //受信データ数が、一定時間同じであれば、受信完了としてデータ読み出しを開始処理を開始する。
   //受信データあり ※6バイト以上になるまでまつ
   if(Serial8.available()>= 7){
-    // Serial.print("ba-ka");
     //---------------------------
     //受信データをバッファに格納
     //---------------------------
@@ -597,13 +452,9 @@ void serialEvent8(){
 
       x = ball.ball_x.demandAve(x);
       y = ball.ball_y.demandAve(y);
-      // Serial.print("!!");
     }
     else{
       // printf("ERR_REV");
     }
   }
-  // Serial.println("sawa");
-  // int a = Serial8.read();
-  // Serial.println(a);
 }
