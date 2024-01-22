@@ -36,6 +36,7 @@ int ball_get;
 int line_A = 0;
 int line_B = 999;
 int Line_flag = 0;
+int Line_c = 0;
 
 const int ang_180 = 230;
 const int ang_90 = 160;
@@ -144,6 +145,7 @@ void loop() {
       }
 
       if(line_A != line_B){
+        Line_c = 0;
         if(Line_flag == 3){
           if((60 < abs(ball.ang) && abs(ball.ang) < 120)){
             if(cam_front.Size < 15 && 50 < cam_back.Size){
@@ -161,7 +163,9 @@ void loop() {
         }
         line_B = line_A;
       }
-
+      if(line.side_flag == 4 && line.line_flag == 1){
+        A = 22;
+      }
       // if(line.side_flag == 1 || line.side_flag == 2){
       //   A = 21;
       // }
@@ -253,6 +257,9 @@ void loop() {
       Line_flag = line.switchLineflag(line_ang);
       MOTOR.motor_0();
       delay(50);
+      if(Line_c == 1){
+        Line_flag = 1;
+      }
     }
     go_ang = line.decideGoang(line_ang,Line_flag);
   }
@@ -279,6 +286,15 @@ void loop() {
         go_ang = 180;
       }
     }
+  }
+
+
+  if(A == 22){
+    if(A != B){
+      B = A;
+    }
+    go_ang = 180;
+    Line_c = 1;
   }
 
 
@@ -336,12 +352,17 @@ void loop() {
   if(motor_flag == 1){
     MOTOR.moveMotor_0(go_ang,go_val,AC_val,0);
   }
-  // Serial.print(" A : ");
-  // Serial.print(A);
+  Serial.print(" A : ");
+  Serial.print(A);
   // Serial.print(" AC : ");
   // Serial.print(AC_val);
+  Serial.print(" go_ang : ");
+  Serial.print(go_ang.degree);
   line.print();
-  // cam_front.print();
+  Serial.print(" | ");
+  cam_front.print();
+  Serial.print(" | ");
+  cam_back.print();
   // ball.print();
   // Serial.print(" time : ");
   // Serial.print(t_loop.read_us());
