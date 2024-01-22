@@ -11,9 +11,10 @@ BALL ball;
 int A = 0;
 int B = 999;
 timer Timer;
-int val = 150;
+int val = 170;
 AC ac;
 int LED = 13;
+timer t_loop;
 
 motor_attack MOTOR;
 
@@ -40,6 +41,7 @@ const int ang_180 = 230;
 const int ang_90 = 160;
 const int ang_30 = 90;
 const int ang_10 = 10;
+const int far_th = 110;
 
 int toogle_f;
 int toogle_P = 27;
@@ -49,7 +51,7 @@ Cam cam_front(4);
 Cam cam_back(3);
 int cam_flag = 0;
 
-int goal_color = 0; //青が0 黄色が1
+int goal_color = 1; //青が0 黄色が1
 
 int dr_p = 33;
 
@@ -87,22 +89,26 @@ void setup() {
 
 
 void loop() {
+  //================================================状況get================================================//
   angle go_ang(0,true);
-  int AC_val = ac.getAC_val();
+  int AC_val = 100;
   int go_val = val;
 
   ball.getBallposition();
   line.getLINE_Vec();
-  ball.ball_get = ball_get;
-  int C = 0;
-  int motor_flag = 1;
-  int AC_flag = 1; // 1は角度で制御 0はカメラで制御
-  if(A == 40 || A == 41){
+  ball.ball_get = ball_get;   //ボールをキャッチしているかどうかのフラグ
+  int C = 0;                  //1は継続条件を満たしている 0は継続条件を満たしていない
+  int motor_flag = 1;         //1は動く 0は動かない
+  int AC_flag = 1;            // 1は角度で制御 0はカメラで制御
+
+  //================================================状況判断================================================//
+
+  if(A == 40 || A == 41 || A == 42){
     C = 1;
   }
 
-  if(C == 1){
-    if(A == 40){
+  if(C == 1){  //継続条件のほう
+    if(A == 40 || A == 42){
       if(abs(ball.ang) < 30 || 150 < abs(ball.ang) || line.LINE_on == 1){
         C = 0;
       }
@@ -114,7 +120,7 @@ void loop() {
     }
   }
 
-  if(C == 0){
+  if(C == 0){  //継続条件じゃないほう
     if(line.LINE_on){
       A = 20;
       line_A = 1;
@@ -139,8 +145,13 @@ void loop() {
 
       if(line_A != line_B){
         if(Line_flag == 3){
-          if((60 < abs(ball.ang) && abs(ball.ang) < 120) && (cam_front.Size < 15 || 50 < cam_back.Size)){
-            A = 40;
+          if((60 < abs(ball.ang) && abs(ball.ang) < 120)){
+            if(cam_front.Size < 15 && 50 < cam_back.Size){
+              A = 40;
+            }
+            else if(cam_back.on == 0 && cam_front.Size < 10){
+              A = 42;
+            }
           }
         }
         if(Line_flag == 1){
@@ -150,10 +161,16 @@ void loop() {
         }
         line_B = line_A;
       }
+
+      // if(line.side_flag == 1 || line.side_flag == 2){
+      //   A = 21;
+      // }
     }
   }
 
-  if(A == 5){
+  //================================================動作設定================================================//
+
+  if(A == 5){  //ボールがないときのやつ
     MOTOR.motor_0();
     ball.getBallposition();
     digitalWrite(LED,HIGH);
@@ -162,7 +179,7 @@ void loop() {
     delay(100);
   }
 
-  if(A == 10){
+  if(A == 10){  //回り込むやつ
     if(A != B){
       B = A;
     }
@@ -171,32 +188,52 @@ void loop() {
     int ang_30_ = ang_30;
     int ang_10_ = ang_10;
 
+    int ang_180_2 = ang_180 - 60;
+    int ang_90_2 = ang_90 - 60;
+    int ang_30_2 = ang_30 - 30;
+    int ang_10_2 = ang_10;
+
     if(ball.ball_get == 0 && (25 < abs(ball.ang) && abs(ball.ang) < 45)){
       go_val = 120;
     }
     if(abs(ball.ang) < 10){
       go_ang = ang_10 / 10.0 * ball.ang;
     }
-    else if(abs(ball.ang) < 30){
-      go_ang = ((ang_30_ - ang_10_) / 20.0 * (abs(ball.ang) - 10) + ang_10_) * ball.ang / abs(ball.ang);
-    }
-    else if(abs(ball.ang) < 90){
-      go_ang = ((ang_90_ - ang_30_) / 60.0 * (abs(ball.ang) - 30) + ang_30_) * ball.ang / abs(ball.ang);
+    else if(ball.far_ < far_th){
+      if(abs(ball.ang) < 30){
+        go_ang = ((ang_30_ - ang_10_) / 20.0 * (abs(ball.ang) - 10) + ang_10_) * ball.ang / abs(ball.ang);
+      }
+      else if(abs(ball.ang) < 90){
+        go_ang = ((ang_90_ - ang_30_) / 60.0 * (abs(ball.ang) - 30) + ang_30_) * ball.ang / abs(ball.ang);
+      }
+      else{
+        go_ang = ((ang_180_ - ang_90_) / 90.0 * (abs(ball.ang) - 90) + ang_90_) * ball.ang / abs(ball.ang);
+      }
     }
     else{
-      go_ang = ((ang_180_ - ang_90_) / 90.0 * (abs(ball.ang) - 90) + ang_90_) * ball.ang / abs(ball.ang);
+      if(abs(ball.ang) < 30){
+        go_ang = ((ang_30_2 - ang_10_2) / 20.0 * (abs(ball.ang) - 10) + ang_10_2) * ball.ang / abs(ball.ang);
+      }
+      else if(abs(ball.ang) < 90){
+        go_ang = ((ang_90_2 - ang_30_2) / 60.0 * (abs(ball.ang) - 30) + ang_30_2) * ball.ang / abs(ball.ang);
+      }
+      else{
+        go_ang = ((ang_180_2 - ang_90_2) / 90.0 * (abs(ball.ang) - 90) + ang_90_2) * ball.ang / abs(ball.ang);
+      }      
     }
   }
 
 
-  if(A == 11){
+  if(A == 11){  //ボールを捕捉して前進するやつ
     if(A != B){
       B = A;
       Timer.reset();
     }
     AC_flag = 0;
     go_ang = 0;
-    go_val = 150;
+    go_val = 170;
+    Serial.print(" time : ");
+    Serial.print(Timer.read_ms());
     if(kick_flag == 0 && 300 < Timer.read_ms() && ball.ball_get == 1){
       kick();
       Timer.reset();
@@ -209,7 +246,7 @@ void loop() {
   }
 
 
-  if(A == 20){
+  if(A == 20){  //ラインから逃げるやつ
     angle line_ang(line.ang,true);
     if(A != B){
       B = A;
@@ -218,6 +255,30 @@ void loop() {
       delay(50);
     }
     go_ang = line.decideGoang(line_ang,Line_flag);
+  }
+
+
+
+  if(A == 21){
+    if(A != B){
+      B = A;
+    }
+    if(line.side_flag == 1){
+      if(abs(ball.ang) < 90){
+        go_ang = 0;
+      }
+      else{
+        go_ang = 180;
+      }
+    }
+    else if(line.side_flag == 2){
+      if(abs(ball.ang) < 90){
+        go_ang = 0;
+      }
+      else{
+        go_ang = 180;
+      }
+    }
   }
 
 
@@ -247,6 +308,18 @@ void loop() {
     }
   }
 
+
+
+  if(A == 42){
+    if(A != B){
+      B = A;
+    }
+    go_ang = 0 - ac.dir;
+  }
+
+  //================================================出力================================================//
+
+
   if(AC_flag == 1){
     AC_val = ac.getAC_val();
   }
@@ -267,10 +340,13 @@ void loop() {
   // Serial.print(A);
   // Serial.print(" AC : ");
   // Serial.print(AC_val);
-  // line.print();
+  line.print();
   // cam_front.print();
   // ball.print();
+  // Serial.print(" time : ");
+  // Serial.print(t_loop.read_us());
   Serial.println();
+  // t_loop.reset();
 
   if(toogle_f != digitalRead(toogle_P)){
     MOTOR.motor_0();

@@ -43,7 +43,7 @@ int BALL::getBallposition(){
         y = (y < 0 ? -150 : 150);
     }
     ang = degrees(atan2(y,x));
-    far = sqrt(x_pos*x_pos + y_pos*y_pos) - 60;
+    far = sqrt(x_pos*x_pos + y_pos*y_pos);
     dx = (far - far_old);
     far_ = far__.sum(dx);
     x_pos = x;
@@ -56,7 +56,7 @@ void BALL::print(){
     Serial.print(" ang : ");
     Serial.print(ang);
     Serial.print(" far : ");
-    Serial.print(far_);
+    Serial.print(far);
     Serial.print(" x : ");
     Serial.print(x_pos);
     Serial.print(" y : ");

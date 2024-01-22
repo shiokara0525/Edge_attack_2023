@@ -18,6 +18,7 @@ public:
     double ang; //ラインの和のベクトルの角度
     float dis_X;
     float dis_Y;
+    int side_flag;
     int num;
     int flag;
     int data_on[27];

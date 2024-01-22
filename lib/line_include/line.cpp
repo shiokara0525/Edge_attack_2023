@@ -68,6 +68,26 @@ int LINE::getLINE_Vec() { //ラインのベクトル(距離,角度)を取得す�
     }
   }
 
+  if(data_on[24] == 1 && data_on[25] == 0){
+    side_flag = 1;
+  }
+  else if(data_on[24] == 0 && data_on[25] == 1){
+    side_flag = 2;
+  }
+  else if(data_on[24] == 1 && data_on[25] == 1 && data_on[26] == 0){
+    side_flag = 3;
+  }
+  else if(data_on[26] == 1 && data_on[25] == 0 && data_on[24] == 0){
+    side_flag = 4;
+  }
+  else if(data_on[24] == 1 && data_on[25] == 1 && data_on[26] == 1){
+    side_flag = 4;
+  }
+  else{
+    side_flag = 0;
+  }
+
+
   for(int i = 0; i <= block_num; i++){
     block_X[i] = ele_X[block_first[i]] + ele_X[block_last[i]];
     block_Y[i] = ele_Y[block_first[i]] + ele_Y[block_last[i]];
@@ -158,8 +178,10 @@ void LINE::print(){
   Serial.print(ang); //ラインのベクトルを表示
   Serial.print(" 距離 : ");
   Serial.print(dis); //ラインのベクトルを表示
-  Serial.print("  X : ");
-  Serial.print(dis_X); //ラインのベクトルを表示
-  Serial.print("  Y : ");
-  Serial.print(dis_Y); //ラインのベクトルを表示
+  // Serial.print("  X : ");
+  // Serial.print(dis_X); //ラインのベクトルを表示
+  // Serial.print("  Y : ");
+  // Serial.print(dis_Y); //ラインのベクトルを表示
+  Serial.print(" side : ");
+  Serial.print(side_flag);
 }
