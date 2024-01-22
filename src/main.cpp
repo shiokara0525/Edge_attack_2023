@@ -52,7 +52,7 @@ Cam cam_front(4);
 Cam cam_back(3);
 int cam_flag = 0;
 
-int goal_color = 1; //青が0 黄色が1
+int goal_color = 0; //青が0 黄色が1
 
 int dr_p = 33;
 
@@ -109,7 +109,7 @@ void loop() {
   }
 
   if(C == 1){  //継続条件のほう
-    if(A == 40 || A == 42){
+    if(A == 40){
       if(abs(ball.ang) < 30 || 150 < abs(ball.ang) || line.LINE_on == 1){
         C = 0;
       }
@@ -117,6 +117,11 @@ void loop() {
     else if(A == 41){
       if(1500 < Timer.read_ms() || line.LINE_on == 1){
         C = 0;
+      }
+    }
+    else if(A == 42){
+      if(100 < abs(ball.ang)){
+        A = 40;
       }
     }
   }
@@ -148,10 +153,10 @@ void loop() {
         Line_c = 0;
         if(Line_flag == 3){
           if((60 < abs(ball.ang) && abs(ball.ang) < 120)){
-            if(cam_front.Size < 15 && 50 < cam_back.Size){
+            if(cam_front.Size < 20 || 50 < cam_back.Size){
               A = 40;
             }
-            else if(cam_back.on == 0 && cam_front.Size < 10){
+            if(cam_back.on == 0 && cam_front.Size < 20){
               A = 42;
             }
           }
@@ -352,17 +357,17 @@ void loop() {
   if(motor_flag == 1){
     MOTOR.moveMotor_0(go_ang,go_val,AC_val,0);
   }
-  Serial.print(" A : ");
-  Serial.print(A);
+  // Serial.print(" A : ");
+  // Serial.print(A);
   // Serial.print(" AC : ");
   // Serial.print(AC_val);
-  Serial.print(" go_ang : ");
-  Serial.print(go_ang.degree);
-  line.print();
-  Serial.print(" | ");
-  cam_front.print();
-  Serial.print(" | ");
-  cam_back.print();
+  // Serial.print(" go_ang : ");
+  // Serial.print(go_ang.degree);
+  // line.print();
+  // Serial.print(" | ");
+  // cam_front.print();
+  // Serial.print(" | ");
+  // cam_back.print();
   // ball.print();
   // Serial.print(" time : ");
   // Serial.print(t_loop.read_us());
@@ -439,7 +444,7 @@ void serialEvent3(){
 
   if(reBuf[0] == 38 && reBuf[4] == 37){
     if(reBuf[3] == 0){
-      cam_front.on = 0;
+      cam_back.on = 0;
     }
     else{
       if(cam_back.color == reBuf[1]){
@@ -447,8 +452,17 @@ void serialEvent3(){
         cam_back.Size = reBuf[3];
         cam_back.ang = -(reBuf[2] - 127);
       }
+      else{
+        cam_back.on = 0;
+      }
     }
   }
+
+  for(int i = 0; i < 5; i++){
+    // Serial.print(reBuf[i]);
+    // Serial.print(" ");
+  }
+  // Serial.println();
   // Serial.print("sawa");
 }
 
