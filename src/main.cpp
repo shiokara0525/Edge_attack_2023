@@ -37,12 +37,13 @@ int line_A = 0;
 int line_B = 999;
 int Line_flag = 0;
 int Line_c = 0;
+timer Line_timer;
 
 const int ang_180 = 230;
 const int ang_90 = 160;
 const int ang_30 = 90;
 const int ang_10 = 10;
-const int far_th = 110;
+const int far_th = 130;
 
 int toogle_f;
 int toogle_P = 27;
@@ -110,7 +111,7 @@ void loop() {
 
   if(C == 1){  //継続条件のほう
     if(A == 40){
-      if(abs(ball.ang) < 30 || 150 < abs(ball.ang) || line.LINE_on == 1){
+      if(abs(ball.ang) < 30 || 150 < abs(ball.ang) || line.LINE_on == 1 || 500 < Timer.read_ms()){
         C = 0;
       }
     }
@@ -120,7 +121,7 @@ void loop() {
       }
     }
     else if(A == 42){
-      if(100 < abs(ball.ang)){
+      if(95 < abs(ball.ang)){
         A = 40;
       }
     }
@@ -132,6 +133,7 @@ void loop() {
       line_A = 1;
       if(line_A != line_B){
         line_B = line_A;
+        Line_timer.reset();
       }
     }
     else{
@@ -151,6 +153,7 @@ void loop() {
 
       if(line_A != line_B){
         Line_c = 0;
+        Line_timer.reset();
         if(Line_flag == 3){
           if((60 < abs(ball.ang) && abs(ball.ang) < 120)){
             if(cam_front.Size < 20 || 50 < cam_back.Size){
@@ -168,7 +171,7 @@ void loop() {
         }
         line_B = line_A;
       }
-      if(line.side_flag == 4 && line.line_flag == 1){
+      if(line.side_flag == 4 && line.line_flag == 1 && Line_timer.read_ms() < 100){
         A = 22;
       }
       // if(line.side_flag == 1 || line.side_flag == 2){
@@ -229,6 +232,10 @@ void loop() {
       else{
         go_ang = ((ang_180_2 - ang_90_2) / 90.0 * (abs(ball.ang) - 90) + ang_90_2) * ball.ang / abs(ball.ang);
       }      
+    }
+
+    if(abs(ball.ang) < 20){
+      go_val = 100;
     }
   }
 
@@ -359,8 +366,6 @@ void loop() {
   }
   // Serial.print(" A : ");
   // Serial.print(A);
-  // Serial.print(" AC : ");
-  // Serial.print(AC_val);
   // Serial.print(" go_ang : ");
   // Serial.print(go_ang.degree);
   // line.print();
