@@ -104,6 +104,7 @@ void loop() {
   int C = 0;                  //1は継続条件を満たしている 0は継続条件を満たしていない
   int motor_flag = 1;         //1は動く 0は動かない
   int AC_flag = 1;            // 1は角度で制御 0はカメラで制御
+  int dribbler_flag = 0;
 
   //================================================状況判断================================================//
 
@@ -118,7 +119,7 @@ void loop() {
       }
     }
     else if(A == 41){
-      if(1500 < Timer.read_ms() || line.LINE_on == 1){
+      if(2000 < Timer.read_ms() || line.LINE_on == 1){
         C = 0;
       }
     }
@@ -164,13 +165,13 @@ void loop() {
               A = 40;
             }
             if(cam_back.on == 0 && cam_front.Size < 20){
-              A = 42;
+              // A = 42;
             }
           }
         }
         if(Line_flag == 1){
-          if(ball.ball_get == 1){
-            // A = 41;
+          if((ball.ang) < 10 && (cam_front.on == 0 || 25 < abs(cam_front.ang))){
+            A = 41;
           }
         }
         line_B = line_A;
@@ -210,7 +211,7 @@ void loop() {
     if(abs(ball.ang) < 10){
       go_ang = ang_10 / 10.0 * ball.ang;
     }
-    if(abs(ball.ang) < 30){
+    else if(abs(ball.ang) < 30){
       go_ang = ((ang_30_ - ang_10_) / 20.0 * (abs(ball.ang) - 10) + ang_10_);
     }
     else if(abs(ball.ang) < 90){
@@ -220,9 +221,7 @@ void loop() {
       go_ang = ((ang_180_ - ang_90) / 90.0 * (abs(ball.ang) - 90) + ang_90_);
     }
 
-    if(ball.ball_get == 2){
-      go_val = 100;
-    }
+    go_ang = go_ang.degree * (ball.ang < 0 ? -1 : 1);
   }
 
 
@@ -231,12 +230,13 @@ void loop() {
       B = A;
       Timer.reset();
     }
+
+    dribbler_flag = 1;
     AC_flag = 0;
     go_ang = 0;
     go_val = 170;
-    Serial.print(" time : ");
-    Serial.print(Timer.read_ms());
-    if(kick_flag == 0 && 300 < Timer.read_ms() && ball.ball_get == 1){
+
+    if(kick_flag == 0 && 200 < Timer.read_ms() && ball.ball_get == 1){
       kick();
       Timer.reset();
       kick_flag = 1;
@@ -312,12 +312,12 @@ void loop() {
       B = A;
       Timer.reset();
     }
-    if(Timer.read_ms() < 300){
+    dribbler_flag = 1;
+    go_val = 100;
+    if(Timer.read_ms() < 1000){
       motor_flag = 0;
     }
-    else{
-      go_ang = 180 - ac.dir;
-    }
+    go_ang = 180;
   }
 
 
@@ -348,16 +348,33 @@ void loop() {
   if(motor_flag == 1){
     MOTOR.moveMotor_0(go_ang,go_val,AC_val,0);
   }
-  // Serial.print(" A : ");
-  // Serial.print(A);
-  // Serial.print(" go_ang : ");
-  // Serial.print(go_ang.degree);
+  else{
+    MOTOR.motor_0();
+  }
+
+  if(dribbler_flag == 1){
+    MOTOR.Moutput(4,200);
+  }
+  else{
+    MOTOR.Moutput(4,0);
+  }
+  Serial.print(" A : ");
+  Serial.print(A);
+  Serial.print(" | ");
+  Serial.print(" go_ang : ");
+  Serial.print(go_ang.degree);
+  Serial.print(" | ");
+  // Serial.print(dribbler_flag);
+  // Serial.print(" | ");
   // line.print();
   // Serial.print(" | ");
-  // cam_front.print();
+  cam_front.print();
+  Serial.print(" | ");
+  cam_back.print();
+  Serial.print(" | ");
+  // ac.print();
   // Serial.print(" | ");
-  // cam_back.print();
-  // ball.print();
+  ball.print();
   // Serial.print(" time : ");
   // Serial.print(t_loop.read_us());
   Serial.println();
@@ -365,6 +382,7 @@ void loop() {
 
   if(toogle_f != digitalRead(toogle_P)){
     MOTOR.motor_0();
+    MOTOR.Moutput(4,0);
     Switch();
     A = 0;
   }
