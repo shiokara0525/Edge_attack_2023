@@ -31,6 +31,7 @@ LINE line;
 int x = 0;
 int y = 0;
 int num = 0;
+int line_first_dir = 0;
 int ball_get;
 
 int line_A = 0;
@@ -53,7 +54,7 @@ Cam cam_front(4);
 Cam cam_back(3);
 int cam_flag = 0;
 
-int goal_color = 0; //青が0 黄色が1
+int goal_color = 1; //青が0 黄色が1
 
 int dr_p = 33;
 
@@ -98,6 +99,7 @@ void loop() {
 
   ball.getBallposition();
   line.getLINE_Vec();
+  ac.dir_target = ac.first;
   ball.ball_get = ball_get;   //ボールをキャッチしているかどうかのフラグ
   int C = 0;                  //1は継続条件を満たしている 0は継続条件を満たしていない
   int motor_flag = 1;         //1は動く 0は動かない
@@ -134,7 +136,9 @@ void loop() {
       if(line_A != line_B){
         line_B = line_A;
         Line_timer.reset();
+        line_first_dir = ac.dir_n;
       }
+      ac.dir_target = line_first_dir;
     }
     else{
       A = 10;
@@ -200,41 +204,23 @@ void loop() {
     int ang_30_ = ang_30;
     int ang_10_ = ang_10;
 
-    int ang_180_2 = ang_180 - 60;
-    int ang_90_2 = ang_90 - 60;
-    int ang_30_2 = ang_30 - 30;
-    int ang_10_2 = ang_10;
-
     if(ball.ball_get == 0 && (25 < abs(ball.ang) && abs(ball.ang) < 45)){
       go_val = 120;
     }
     if(abs(ball.ang) < 10){
       go_ang = ang_10 / 10.0 * ball.ang;
     }
-    else if(ball.far_ < far_th){
-      if(abs(ball.ang) < 30){
-        go_ang = ((ang_30_ - ang_10_) / 20.0 * (abs(ball.ang) - 10) + ang_10_) * ball.ang / abs(ball.ang);
-      }
-      else if(abs(ball.ang) < 90){
-        go_ang = ((ang_90_ - ang_30_) / 60.0 * (abs(ball.ang) - 30) + ang_30_) * ball.ang / abs(ball.ang);
-      }
-      else{
-        go_ang = ((ang_180_ - ang_90_) / 90.0 * (abs(ball.ang) - 90) + ang_90_) * ball.ang / abs(ball.ang);
-      }
+    if(abs(ball.ang) < 30){
+      go_ang = ((ang_30_ - ang_10_) / 20.0 * (abs(ball.ang) - 10) + ang_10_);
+    }
+    else if(abs(ball.ang) < 90){
+      go_ang = ((ang_90_ - ang_30_) / 60.0 * (abs(ball.ang) - 30) + ang_30_);
     }
     else{
-      if(abs(ball.ang) < 30){
-        go_ang = ((ang_30_2 - ang_10_2) / 20.0 * (abs(ball.ang) - 10) + ang_10_2) * ball.ang / abs(ball.ang);
-      }
-      else if(abs(ball.ang) < 90){
-        go_ang = ((ang_90_2 - ang_30_2) / 60.0 * (abs(ball.ang) - 30) + ang_30_2) * ball.ang / abs(ball.ang);
-      }
-      else{
-        go_ang = ((ang_180_2 - ang_90_2) / 90.0 * (abs(ball.ang) - 90) + ang_90_2) * ball.ang / abs(ball.ang);
-      }      
+      go_ang = ((ang_180_ - ang_90) / 90.0 * (abs(ball.ang) - 90) + ang_90_);
     }
 
-    if(abs(ball.ang) < 20){
+    if(ball.ball_get == 2){
       go_val = 100;
     }
   }
@@ -267,8 +253,6 @@ void loop() {
     if(A != B){
       B = A;
       Line_flag = line.switchLineflag(line_ang);
-      MOTOR.motor_0();
-      delay(50);
       if(Line_c == 1){
         Line_flag = 1;
       }
