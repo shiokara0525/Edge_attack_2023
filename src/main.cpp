@@ -146,7 +146,12 @@ void loop() {
       line_A = 0;
       if(ball.flag == 1){
         if(ball.ball_get == 1 && abs(ball.ang) < 10){
-          A = 11;
+          if(cam_front.on == 1 && abs(cam_front.ang) < 10){
+            A = 11;
+          }
+          else{
+            A = 12;
+          }
         }
         else{
           A = 10;
@@ -165,13 +170,13 @@ void loop() {
               A = 40;
             }
             if(cam_back.on == 0 && cam_front.Size < 20){
-              // A = 42;
+              A = 42;
             }
           }
         }
         if(Line_flag == 1){
           if((ball.ang) < 10 && (cam_front.on == 0 || 25 < abs(cam_front.ang))){
-            A = 41;
+            // A = 41;
           }
         }
         line_B = line_A;
@@ -232,18 +237,41 @@ void loop() {
     }
 
     dribbler_flag = 1;
-    AC_flag = 0;
+    if(abs(cam_front.ang) < 25){
+      AC_flag = 0;
+    }
+
     go_ang = 0;
     go_val = 170;
-
-    if(kick_flag == 0 && 200 < Timer.read_ms() && ball.ball_get == 1){
-      kick();
-      Timer.reset();
-      kick_flag = 1;
+    if(abs(cam_front.ang) < 5 && cam_front.on == 1){
+      if(kick_flag == 0 && 200 < Timer.read_ms() && ball.ball_get == 1){
+        kick();
+        Timer.reset();
+        kick_flag = 1;
+      }
+      if(kick_flag == 1 && 350 < Timer.read_ms() && ball.ball_get == 1){
+        kick();
+        Timer.reset();
+      }
     }
-    if(kick_flag == 1 && 500 < Timer.read_ms() && ball.ball_get == 1){
-      kick();
+  }
+
+
+  if(A == 12){
+    if(A != B){
+      B = A;
       Timer.reset();
+    }
+    if(Timer.read_ms() < 500){
+      go_val = 100;
+    }
+    dribbler_flag = 1;
+
+    if(cam_front.on == 0){
+      go_ang = 180;
+    }
+    else{
+      go_ang = cam_front.ang * 6;
     }
   }
 
@@ -374,7 +402,7 @@ void loop() {
   Serial.print(" | ");
   // ac.print();
   // Serial.print(" | ");
-  ball.print();
+  // ball.print();
   // Serial.print(" time : ");
   // Serial.print(t_loop.read_us());
   Serial.println();
