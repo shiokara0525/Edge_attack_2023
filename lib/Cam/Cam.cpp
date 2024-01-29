@@ -33,5 +33,7 @@ void Cam::print(){
         Serial.print(ang);
         Serial.print("  size: ");
         Serial.print(Size);
+        Serial.print(" senter : ");
+        Serial.print(senter);
     }
 }

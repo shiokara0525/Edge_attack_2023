@@ -42,7 +42,7 @@ timer Line_timer;
 
 const int ang_180 = 230;
 const int ang_90 = 160;
-const int ang_30 = 90;
+const int ang_30 = 70;
 const int ang_10 = 10;
 const int far_th = 130;
 
@@ -53,6 +53,9 @@ void Switch();
 Cam cam_front(4);
 Cam cam_back(3);
 int cam_flag = 0;
+int cam_A = 0;
+int cam_B = 999;
+timer cam_T;
 
 int goal_color = 1; //青が0 黄色が1
 
@@ -146,7 +149,7 @@ void loop() {
       line_A = 0;
       if(ball.flag == 1){
         if(ball.ball_get == 1 && abs(ball.ang) < 10){
-          if(cam_front.on == 1 && abs(cam_front.ang) < 10){
+          if(cam_front.on == 1 && (abs(cam_front.ang) < 10 || cam_front.senter == 1)){
             A = 11;
           }
           else{
@@ -214,7 +217,7 @@ void loop() {
       go_val = 120;
     }
     if(abs(ball.ang) < 10){
-      go_ang = ang_10 / 10.0 * ball.ang;
+      go_ang = ang_10_ / 10.0 * ball.ang;
     }
     else if(abs(ball.ang) < 30){
       go_ang = ((ang_30_ - ang_10_) / 20.0 * (abs(ball.ang) - 10) + ang_10_);
@@ -234,6 +237,7 @@ void loop() {
     if(A != B){
       B = A;
       Timer.reset();
+      kick_flag = 0;
     }
 
     dribbler_flag = 1;
@@ -243,15 +247,23 @@ void loop() {
 
     go_ang = 0;
     go_val = 170;
-    if(abs(cam_front.ang) < 5 && cam_front.on == 1){
-      if(kick_flag == 0 && 200 < Timer.read_ms() && ball.ball_get == 1){
-        kick();
-        Timer.reset();
-        kick_flag = 1;
+    if(cam_front.senter == 1 && cam_front.on == 1 && abs(cam_front.ang) < 10){
+      if(kick_flag == 0){
+        if(70 < cam_front.Size){
+          if(250 < Timer.read_ms()){
+            kick_flag = 1;
+            kick();
+          }
+        }
+        else if(40 < cam_front.Size){
+          if(1000 < Timer.read_ms()){
+            kick_flag = 1;
+            kick();
+          }
+        }
       }
-      if(kick_flag == 1 && 350 < Timer.read_ms() && ball.ball_get == 1){
+      else if(kick_flag == 1 && 500 < Timer.read_ms() && ball.ball_get == 1){
         kick();
-        Timer.reset();
       }
     }
   }
@@ -266,12 +278,13 @@ void loop() {
       go_val = 100;
     }
     dribbler_flag = 1;
+    go_val = 120;
 
     if(cam_front.on == 0){
       go_ang = 180;
     }
     else{
-      go_ang = cam_front.ang * 6;
+      go_ang = cam_front.ang * 4;
     }
   }
 
@@ -381,17 +394,24 @@ void loop() {
   }
 
   if(dribbler_flag == 1){
-    MOTOR.Moutput(4,200);
+    MOTOR.Moutput(4,210);
   }
   else{
     MOTOR.Moutput(4,0);
   }
+
+  if(cam_front.senter == 1){
+    digitalWrite(LED,HIGH);
+  }
+  else{
+    digitalWrite(LED,LOW);
+  }
   Serial.print(" A : ");
   Serial.print(A);
-  Serial.print(" | ");
-  Serial.print(" go_ang : ");
-  Serial.print(go_ang.degree);
-  Serial.print(" | ");
+  // Serial.print(" | ");
+  // Serial.print(" go_ang : ");
+  // Serial.print(go_ang.degree);
+  // Serial.print(" | ");
   // Serial.print(dribbler_flag);
   // Serial.print(" | ");
   // line.print();
@@ -402,7 +422,8 @@ void loop() {
   Serial.print(" | ");
   // ac.print();
   // Serial.print(" | ");
-  // ball.print();
+  ball.print();
+  // Serial.print(" | ");
   // Serial.print(" time : ");
   // Serial.print(t_loop.read_us());
   Serial.println();
@@ -465,19 +486,19 @@ void BLDC_work(){
 
 
 void serialEvent3(){
-  uint8_t reBuf[5];
-  if(Serial3.available() < 5){
+  uint8_t reBuf[6];
+  if(Serial3.available() < 6){
     return;
   }
 
-  for(int i = 0; i < 5; i++){
+  for(int i = 0; i < 6; i++){
     reBuf[i] = Serial3.read();
   }
   while(Serial3.available()){
     Serial3.read();
   }
 
-  if(reBuf[0] == 38 && reBuf[4] == 37){
+  if(reBuf[0] == 38 && reBuf[5] == 37){
     if(reBuf[3] == 0){
       cam_back.on = 0;
     }
@@ -486,6 +507,7 @@ void serialEvent3(){
         cam_back.on = 1;
         cam_back.Size = reBuf[3];
         cam_back.ang = -(reBuf[2] - 127);
+        cam_back.senter = reBuf[4];
       }
       else{
         cam_back.on = 0;
@@ -493,7 +515,7 @@ void serialEvent3(){
     }
   }
 
-  for(int i = 0; i < 5; i++){
+  for(int i = 0; i < 6; i++){
     // Serial.print(reBuf[i]);
     // Serial.print(" ");
   }
@@ -504,19 +526,19 @@ void serialEvent3(){
 
 
 void serialEvent4(){
-  uint8_t reBuf[5];
-  if(Serial4.available() < 5){
+  uint8_t reBuf[6];
+  if(Serial4.available() < 6){
     return;
   }
 
-  for(int i = 0; i < 5; i++){
+  for(int i = 0; i < 6; i++){
     reBuf[i] = Serial4.read();
   }
   while(Serial4.available()){
     Serial4.read();
   }
 
-  if(reBuf[0] == 38 && reBuf[4] == 37){
+  if(reBuf[0] == 38 && reBuf[5] == 37){
     if(reBuf[3] == 0){
       cam_front.on = 0;
     }
@@ -525,6 +547,7 @@ void serialEvent4(){
         cam_front.on = 1;
         cam_front.Size = reBuf[3];
         cam_front.ang = -(reBuf[2] - 127);
+        cam_front.senter = reBuf[4];
       }
       else{
         cam_front.on = 0;

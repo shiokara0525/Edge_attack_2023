@@ -17,4 +17,5 @@ class Cam{
         int on = 0;
         int color = 0;
         MA csize;
+        int senter;
 };
