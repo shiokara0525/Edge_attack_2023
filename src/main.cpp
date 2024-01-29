@@ -149,7 +149,7 @@ void loop() {
       line_A = 0;
       if(ball.flag == 1){
         if(ball.ball_get == 1 && abs(ball.ang) < 10){
-          if(cam_front.on == 1 && (abs(cam_front.ang) < 10 || cam_front.senter == 1)){
+          if(cam_front.on == 1 && (abs(cam_front.ang) < 15 || cam_front.senter == 1)){
             A = 11;
           }
           else{
@@ -241,22 +241,21 @@ void loop() {
     }
 
     dribbler_flag = 1;
-    if(abs(cam_front.ang) < 25){
-      AC_flag = 0;
-    }
+    AC_flag = 1;
+    ac.dir_target += 30;
 
     go_ang = 0;
     go_val = 170;
-    if(cam_front.senter == 1 && cam_front.on == 1 && abs(cam_front.ang) < 10){
+    if(cam_front.senter == 1 && cam_front.on == 1 && abs(cam_front.ang) < 5){
       if(kick_flag == 0){
         if(70 < cam_front.Size){
-          if(250 < Timer.read_ms()){
+          if(100 < Timer.read_ms()){
             kick_flag = 1;
             kick();
           }
         }
-        else if(40 < cam_front.Size){
-          if(1000 < Timer.read_ms()){
+        else if(30 < cam_front.Size){
+          if(300 < Timer.read_ms()){
             kick_flag = 1;
             kick();
           }
@@ -280,12 +279,7 @@ void loop() {
     dribbler_flag = 1;
     go_val = 120;
 
-    if(cam_front.on == 0){
-      go_ang = 180;
-    }
-    else{
-      go_ang = cam_front.ang * 4;
-    }
+    go_ang = 180;
   }
 
 
@@ -408,10 +402,10 @@ void loop() {
   }
   Serial.print(" A : ");
   Serial.print(A);
-  // Serial.print(" | ");
-  // Serial.print(" go_ang : ");
-  // Serial.print(go_ang.degree);
-  // Serial.print(" | ");
+  Serial.print(" | ");
+  Serial.print(" go_ang : ");
+  Serial.print(go_ang.degree);
+  Serial.print(" | ");
   // Serial.print(dribbler_flag);
   // Serial.print(" | ");
   // line.print();
@@ -422,7 +416,7 @@ void loop() {
   Serial.print(" | ");
   // ac.print();
   // Serial.print(" | ");
-  ball.print();
+  // ball.print();
   // Serial.print(" | ");
   // Serial.print(" time : ");
   // Serial.print(t_loop.read_us());
@@ -509,9 +503,6 @@ void serialEvent3(){
         cam_back.ang = -(reBuf[2] - 127);
         cam_back.senter = reBuf[4];
       }
-      else{
-        cam_back.on = 0;
-      }
     }
   }
 
@@ -549,12 +540,14 @@ void serialEvent4(){
         cam_front.ang = -(reBuf[2] - 127);
         cam_front.senter = reBuf[4];
       }
-      else{
-        cam_front.on = 0;
-      }
     }
   }
   else{
+  }
+
+  for(int i = 0; i < 6; i++){
+    // Serial.print(" ");
+    // Serial.print(reBuf[i]);
   }
 }
 
