@@ -1,80 +1,72 @@
 #include <Arduino.h>
-#include<Servo.h>
-#include<Cam.h>
+#include<Adafruit_NeoPixel.h>
 #include<ac.h>
 #include<ball.h>
 #include<line.h>
 #include<motor_a.h>
+#include<MA.h>
 #include<timer.h>
+#include<Cam.h>
 
 BALL ball;
+LINE line;
+AC ac;
+motor_attack MOTOR;
+timer Timer;
+timer Main;
+
 int A = 0;
 int B = 999;
-timer Timer;
-int val = 170;
-AC ac;
-int LED = 13;
-timer t_loop;
-
-motor_attack MOTOR;
-
-// Servo esc;
-// #define MAX_SIGNAL 2000  //PWM信号における最大のパルス幅[マイクロ秒]
-// #define MIN_SIGNAL 1000  //PWM信号における最小のパルス幅[マイクロ秒]
-// #define ESC_PIN 33  //ESCへの出力ピン
-// float volume = 1100.0;  //可変抵抗の値を入れる変数
-// char message[50];  //シリアルモニタへ表示する文字列を入れる変数
-// void BLDC_work();
-// void BLDC_begin();
-
-LINE line;
-int x = 0;
-int y = 0;
-int num = 0;
-int line_first_dir = 0;
-int ball_get;
-
-int line_A = 0;
-int line_B = 999;
-int Line_flag = 0;
-int Line_c = 0;
-timer Line_timer;
-
 const int ang_180 = 230;
-const int ang_90 = 160;
-const int ang_30 = 70;
-const int ang_10 = 10;
+const int ang_90 = 140;
+const int ang_30 = 90;
+const int ang_10 = 20;
 const int far_th = 130;
-
-int toogle_f;
-int toogle_P = 27;
-void Switch();
-
-Cam cam_front(4);
-Cam cam_back(3);
-int cam_flag = 0;
-int cam_A = 0;
-int cam_B = 999;
-timer cam_T;
-
-int goal_color = 1; //青が0 黄色が1
-
-int dr_p = 33;
-
-
+int go_val = 200;
+int print_flag = 1;// 1だったらシリアルプリントする
+//======================================================きっく======================================================//
+void kick();
+timer kick_time;
+int Kick_F = 0;
 const int C = 32;
 const int K = 31;
 int kick_flag = 0;
-void kick();
+//======================================================neopiku======================================================//
+#define DELAYVAL 500
+#define PIN        30 
+#define NUMPIXELS 16
+
+int Neo[16] = {12,11,10,9,8,7,6,5,4,3,2,1,0,15,14,13};
+int Neo_p = 999;
+
+Adafruit_NeoPixel pixels(DELAYVAL, PIN, NEO_GRB + NEO_KHZ800);
+//======================================================カメラ======================================================//
+int goal_color = 1;  //青が0 黄色が1
+Cam cam_front(4);
+Cam cam_back(3);
+//======================================================スタートスイッチ======================================================//
+int LED = 13;
+int toogle_f;
+int toogle_P = 27;
+void Switch();
+//======================================================ライン======================================================//
+int Line_flag = 0;
+//======================================================関数たち======================================================/
 
 void setup() {
   Serial.begin(9600);
   ball.begin();
   line.begin();
-  cam_back.begin();
-  cam_front.begin();
   ac.setup();
+  cam_front.begin();
+  cam_back.begin();
+  pixels.begin();
+  pixels.clear();
   pinMode(LED,OUTPUT);
+  pinMode(K,OUTPUT);
+  pinMode(C,OUTPUT);
+  digitalWrite(C,HIGH);
+  digitalWrite(K,LOW);
   if(goal_color == 0){
     cam_front.color = 0;  //青が0 黄色が1
     cam_back.color = 1;  //青が0 黄色が1
@@ -83,78 +75,32 @@ void setup() {
     cam_front.color = 1;  //青が0 黄色が1
     cam_back.color = 0;  //青が0 黄色が1
   }
-
-  pinMode(K,OUTPUT);
-  pinMode(C,OUTPUT);
-  digitalWrite(C,HIGH);
-  // MOTOR.Moutput(4,-175);
-  digitalWrite(K,LOW);
   Switch();
 }
 
-
-
 void loop() {
-  //================================================状況get================================================//
-  angle go_ang(0,true);
-  int AC_val = 100;
-  int go_val = val;
-
+  Main.reset();
   ball.getBallposition();
-  line.getLINE_Vec();
-  ac.dir_target = ac.first;
-  ball.ball_get = ball_get;   //ボールをキャッチしているかどうかのフラグ
-  int C = 0;                  //1は継続条件を満たしている 0は継続条件を満たしていない
-  int motor_flag = 1;         //1は動く 0は動かない
-  int AC_flag = 1;            // 1は角度で制御 0はカメラで制御
-  int dribbler_flag = 0;
+  cam_front.getCamdata();
+  float AC_val = 100;
+  angle go_ang(ball.ang,true);
+  int max_val = go_val;
+  int line_flag = line.getLINE_Vec();
+  int AC_flag = 0; //0だったら絶対的な角度とる 1だったらゴール向く
+  int kick_ = 0; //0だったらキックしない 1だったらキック
+  int M_flag = 1; //1だったら動き続ける 0だったら止まる
 
-  //================================================状況判断================================================//
-
-  if(A == 40 || A == 41 || A == 42){
-    C = 1;
+  if(line_flag == 1){
+    A = 20;
   }
-
-  if(C == 1){  //継続条件のほう
-    if(A == 40){
-      if(abs(ball.ang) < 30 || 150 < abs(ball.ang) || line.LINE_on == 1 || 500 < Timer.read_ms()){
-        C = 0;
-      }
-    }
-    else if(A == 41){
-      if(2000 < Timer.read_ms() || line.LINE_on == 1){
-        C = 0;
-      }
-    }
-    else if(A == 42){
-      if(95 < abs(ball.ang)){
-        A = 40;
-      }
-    }
-  }
-
-  if(C == 0){  //継続条件じゃないほう
-    if(line.LINE_on){
-      A = 20;
-      line_A = 1;
-      if(line_A != line_B){
-        line_B = line_A;
-        Line_timer.reset();
-        line_first_dir = ac.dir_n;
-      }
-      ac.dir_target = line_first_dir;
+  else{
+    if(line.side_flag != 0){
+      A = 21;
     }
     else{
-      A = 10;
-      line_A = 0;
       if(ball.flag == 1){
-        if(ball.ball_get == 1 && abs(ball.ang) < 10){
-          if(cam_front.on == 1 && (abs(cam_front.ang) < 15 || cam_front.senter == 1)){
-            A = 11;
-          }
-          else{
-            A = 12;
-          }
+        if(ball.ball_get == 1 || ball.ball_get == 2){
+          A = 11;
         }
         else{
           A = 10;
@@ -163,45 +109,15 @@ void loop() {
       else{
         A = 5;
       }
-
-      if(line_A != line_B){
-        Line_c = 0;
-        Line_timer.reset();
-        if(Line_flag == 3){
-          if((60 < abs(ball.ang) && abs(ball.ang) < 120)){
-            if(cam_front.Size < 20 || 50 < cam_back.Size){
-              A = 40;
-            }
-            if(cam_back.on == 0 && cam_front.Size < 20){
-              A = 42;
-            }
-          }
-        }
-        if(Line_flag == 1){
-          if((ball.ang) < 10 && (cam_front.on == 0 || 25 < abs(cam_front.ang))){
-            // A = 41;
-          }
-        }
-        line_B = line_A;
-      }
-      if(line.side_flag == 4 && line.line_flag == 1 && Line_timer.read_ms() < 100){
-        A = 22;
-      }
-      // if(line.side_flag == 1 || line.side_flag == 2){
-      //   A = 21;
-      // }
     }
   }
 
-  //================================================動作設定================================================//
-
-  if(A == 5){  //ボールがないときのやつ
+  if(A == 5){
+    if(A != B){
+      B = A;
+    }
+    M_flag = 0;
     MOTOR.motor_0();
-    ball.getBallposition();
-    digitalWrite(LED,HIGH);
-    delay(100);
-    digitalWrite(LED,LOW);
-    delay(100);
   }
 
   if(A == 10){  //回り込むやつ
@@ -212,15 +128,17 @@ void loop() {
     int ang_90_ = ang_90;
     int ang_30_ = ang_30;
     int ang_10_ = ang_10;
-
-    if(ball.ball_get == 0 && (25 < abs(ball.ang) && abs(ball.ang) < 45)){
-      go_val = 120;
+    if(70 < abs(ac.dir)){
+      // ball.ang -= ac.dir;
     }
+
     if(abs(ball.ang) < 10){
       go_ang = ang_10_ / 10.0 * ball.ang;
     }
     else if(abs(ball.ang) < 30){
+      max_val -= 100;
       go_ang = ((ang_30_ - ang_10_) / 20.0 * (abs(ball.ang) - 10) + ang_10_);
+
     }
     else if(abs(ball.ang) < 90){
       go_ang = ((ang_90_ - ang_30_) / 60.0 * (abs(ball.ang) - 30) + ang_30_);
@@ -233,203 +151,116 @@ void loop() {
   }
 
 
-  if(A == 11){  //ボールを捕捉して前進するやつ
+  if(A == 11){
     if(A != B){
       B = A;
       Timer.reset();
       kick_flag = 0;
     }
-
-    dribbler_flag = 1;
     AC_flag = 1;
-    ac.dir_target += 30;
-
+    if(abs(cam_front.ang) < 10 || cam_front.senter == 1){
+      if(kick_flag == 0 && 200 < Timer.read_ms()){
+        kick_ = 1;
+        kick_flag = 1;
+        Timer.reset();
+      }
+      else if(kick_flag == 1 && 400 < Timer.read_ms()){
+        kick_ = 1;
+        Timer.reset();
+      }
+    }
     go_ang = 0;
-    go_val = 170;
-    if(cam_front.senter == 1 && cam_front.on == 1 && abs(cam_front.ang) < 5){
-      if(kick_flag == 0){
-        if(70 < cam_front.Size){
-          if(100 < Timer.read_ms()){
-            kick_flag = 1;
-            kick();
-          }
-        }
-        else if(30 < cam_front.Size){
-          if(300 < Timer.read_ms()){
-            kick_flag = 1;
-            kick();
-          }
-        }
-      }
-      else if(kick_flag == 1 && 500 < Timer.read_ms() && ball.ball_get == 1){
-        kick();
-      }
-    }
   }
-
-
-  if(A == 12){
-    if(A != B){
-      B = A;
-      Timer.reset();
-    }
-    if(Timer.read_ms() < 500){
-      go_val = 100;
-    }
-    dribbler_flag = 1;
-    go_val = 120;
-
-    go_ang = 180;
-  }
-
 
   if(A == 20){  //ラインから逃げるやつ
     angle line_ang(line.ang,true);
     if(A != B){
       B = A;
       Line_flag = line.switchLineflag(line_ang);
-      if(Line_c == 1){
-        Line_flag = 1;
-      }
     }
     go_ang = line.decideGoang(line_ang,Line_flag);
   }
 
-
-
   if(A == 21){
-    if(A != B){
-      B = A;
-    }
     if(line.side_flag == 1){
-      if(abs(ball.ang) < 90){
-        go_ang = 0;
-      }
-      else{
-        go_ang = 180;
-      }
-    }
-    else if(line.side_flag == 2){
-      if(abs(ball.ang) < 90){
-        go_ang = 0;
-      }
-      else{
-        go_ang = 180;
-      }
-    }
-  }
-
-
-  if(A == 22){
-    if(A != B){
-      B = A;
-    }
-    go_ang = 180;
-    Line_c = 1;
-  }
-
-
-  if(A == 40){ //ラインが後ろにある時、横にびゃーっていくやつ
-    if(A != B){
-      B = A;
-    }
-    if(ball.ang < 0){
       go_ang = -90;
     }
-    else{
+    else if(line.side_flag == 2){
       go_ang = 90;
     }
-  }
-
-
-  if(A == 41){  //後ろ行ってぽん
-    if(A != B){
-      B = A;
-      Timer.reset();
+    else if(line.side_flag == 3){
+      go_ang = 180;
     }
-    dribbler_flag = 1;
-    go_val = 100;
-    if(Timer.read_ms() < 1000){
-      motor_flag = 0;
+    else if(line.side_flag == 4){
+      go_ang = 0;
     }
-    go_ang = 180;
   }
 
 
 
-  if(A == 42){
-    if(A != B){
-      B = A;
-    }
-    go_ang = 0 - ac.dir;
-  }
-
-  //================================================出力================================================//
-
-
-  if(AC_flag == 1){
+  if(AC_flag == 0){
     AC_val = ac.getAC_val();
   }
-  else{
-    if(cam_front.on == 1){
-      AC_val = ac.getCam_val(cam_front.ang);
-      MOTOR.motor_ac(AC_val);
+  else if(AC_flag == 1){
+    AC_val = ac.getCam_val(cam_front.ang);
+  }
+
+  if(kick_ == 1){
+    if(Kick_F == 0){
+      Kick_F = 1;
+      kick_time.reset();
+    }
+  }
+
+  if(Kick_F == 1){
+    if(kick_time.read_ms() < 10){
+      digitalWrite(C,LOW);
+    }
+    else if(kick_time.read_ms() < 60){
+      digitalWrite(K,HIGH);
+      digitalWrite(LED,HIGH);
+    }
+    else if(kick_time.read_ms() < 70){
+      digitalWrite(K,LOW);
+      digitalWrite(LED,LOW);
     }
     else{
-      AC_val = ac.getAC_val();
+      digitalWrite(C,HIGH);
+      Kick_F = 0;
     }
   }
 
-  if(motor_flag == 1){
-    MOTOR.moveMotor_0(go_ang,go_val,AC_val,0);
+  if(M_flag == 1){
+    MOTOR.moveMotor_0(go_ang,max_val,AC_val,0);
   }
-  else{
+  else if(M_flag == 0){
     MOTOR.motor_0();
   }
-
-  if(dribbler_flag == 1){
-    MOTOR.Moutput(4,210);
+  if(print_flag == 1){
+    Serial.print(" | ");
+    Serial.print(go_ang.degree);
+    // Serial.print(" | ");
+    // Serial.print(" ac : ");
+    // Serial.print(AC_flag);
+    // Serial.print(" | ");
+    // ball.print();
+    // Serial.print(" | ");
+    line.print();
+    // Serial.print(" | ");
+    // ac.print();
+    // Serial.print(" time : ");
+    // Serial.print(Main.read_us());
+    // Serial.print(" | ");
+    // cam_front.print();
   }
-  else{
-    MOTOR.Moutput(4,0);
-  }
-
-  if(cam_front.senter == 1){
-    digitalWrite(LED,HIGH);
-  }
-  else{
-    digitalWrite(LED,LOW);
-  }
-  Serial.print(" A : ");
-  Serial.print(A);
-  Serial.print(" | ");
-  Serial.print(" go_ang : ");
-  Serial.print(go_ang.degree);
-  Serial.print(" | ");
-  // Serial.print(dribbler_flag);
-  // Serial.print(" | ");
-  // line.print();
-  // Serial.print(" | ");
-  cam_front.print();
-  Serial.print(" | ");
-  cam_back.print();
-  Serial.print(" | ");
-  // ac.print();
-  // Serial.print(" | ");
-  // ball.print();
-  // Serial.print(" | ");
-  // Serial.print(" time : ");
-  // Serial.print(t_loop.read_us());
-  Serial.println();
-  // t_loop.reset();
 
   if(toogle_f != digitalRead(toogle_P)){
     MOTOR.motor_0();
-    MOTOR.Moutput(4,0);
     Switch();
-    A = 0;
   }
+  Serial.println();
 }
+
 
 
 void Switch(){
@@ -444,6 +275,7 @@ void Switch(){
   while(digitalRead(toogle_P) == toogle_f);
   toogle_f = digitalRead(toogle_P);
 }
+
 
 
 void kick(){
@@ -461,25 +293,9 @@ void kick(){
 }
 
 
-void BLDC_begin(){
-  // esc.attach(ESC_PIN);  //ESCへの出力ピンをアタッチします
-  // esc.writeMicroseconds(MAX_SIGNAL);  //ESCへ最大のパルス幅を指示します
-  // digitalWrite(LED,HIGH);
-  // delay(2000);
-  // esc.writeMicroseconds(MIN_SIGNAL);  //ESCへ最小のパルス幅を指示します
-  // digitalWrite(LED,LOW);
-  // delay(2000);
-}
-
-
-
-void BLDC_work(){
-  // esc.writeMicroseconds(1150);
-}
-
-
 
 void serialEvent3(){
+  // Serial.print("sawa1");
   uint8_t reBuf[6];
   if(Serial3.available() < 6){
     return;
@@ -493,16 +309,8 @@ void serialEvent3(){
   }
 
   if(reBuf[0] == 38 && reBuf[5] == 37){
-    if(reBuf[3] == 0){
-      cam_back.on = 0;
-    }
-    else{
-      if(cam_back.color == reBuf[1]){
-        cam_back.on = 1;
-        cam_back.Size = reBuf[3];
-        cam_back.ang = -(reBuf[2] - 127);
-        cam_back.senter = reBuf[4];
-      }
+    for(int i = 0; i < 4; i++){
+      cam_front.data_byte[i] = reBuf[i+1];
     }
   }
 
@@ -517,6 +325,7 @@ void serialEvent3(){
 
 
 void serialEvent4(){
+  // Serial.print("sawa2");
   uint8_t reBuf[6];
   if(Serial4.available() < 6){
     return;
@@ -530,19 +339,9 @@ void serialEvent4(){
   }
 
   if(reBuf[0] == 38 && reBuf[5] == 37){
-    if(reBuf[3] == 0){
-      cam_front.on = 0;
+    for(int i = 0; i < 4; i++){
+      cam_front.data_byte[i] = reBuf[i+1];
     }
-    else{
-      if(cam_front.color == reBuf[1]){
-        cam_front.on = 1;
-        cam_front.Size = reBuf[3];
-        cam_front.ang = -(reBuf[2] - 127);
-        cam_front.senter = reBuf[4];
-      }
-    }
-  }
-  else{
   }
 
   for(int i = 0; i < 6; i++){
@@ -554,7 +353,7 @@ void serialEvent4(){
 
 
 void serialEvent6(){
-  // Serial.print(" sawa ");
+  // Serial.println(" sawa3 ");
   uint8_t read[6];
   int n = 1;
   if(Serial6.available() < 6){
@@ -593,48 +392,63 @@ void serialEvent6(){
 
 
 void serialEvent8(){
+  // Serial.println("sawa4");
   int n;
   int x,y;
   word revBuf_word[7];
   byte revBuf_byte[7];
   //受信データ数が、一定時間同じであれば、受信完了としてデータ読み出しを開始処理を開始する。
   //受信データあり ※6バイト以上になるまでまつ
-  if(Serial8.available()>= 7){
+  if(Serial8.available() < 7){
+    // Serial.print(Serial8.available());
+    return;
+  }
+
+  revBuf_byte[0] = Serial8.read();
+  if(revBuf_byte[0] != 0xFF){
+    // Serial.print("!!!!!");
+    return;
+  }
     //---------------------------
     //受信データをバッファに格納
     //---------------------------
-    n = 0;
-    while(Serial8.available()>0 ){ //受信データがなくなるまで読み続ける
-      //6バイト目まではデータを格納、それ以上は不要なデータであるため捨てる。
-      if(n < 7){
-        revBuf_byte[n] = Serial8.read();   //revBuf_byte[n] = Serial2.read();
-      }
-      else{
-        Serial8.read(); //Serial2.read();  //読みだすのみで格納しない。
-      }
-      n++;
+    n = 1;
+  while(Serial8.available()>0 ){ //受信データがなくなるまで読み続ける
+    //6バイト目まではデータを格納、それ以上は不要なデータであるため捨てる。
+    if(n < 7){
+      revBuf_byte[n] = Serial8.read();   //revBuf_byte[n] = Serial2.read();
     }
+    else{
+      Serial8.read(); //Serial2.read();  //読みだすのみで格納しない。
+    }
+    n++;
+  }
+  // for(int i = 0; i < 7; i++){
+  //   Serial.print(revBuf_byte[i]);
+  //   Serial.print(" ");
+  // }
     //---------------------------
     //データの中身を確認
     //---------------------------
     //データの先頭、終了コードあることを確認
-    if((revBuf_byte[0] == 0xFF ) && ( revBuf_byte[6] == 0xAA )){
-    //いったんWORD型（16bitデータ）としてから、int16_tとする。
-      revBuf_word[0] = (uint16_t(revBuf_byte[1])<< 8);//上位8ビットをbyteから、Wordに型変換して格納　上位桁にするため8ビットシフト
-      revBuf_word[1] = uint16_t(revBuf_byte[2]);//下位8ビットをbyteから、Wordに型変換して格納      
-      x = int16_t(revBuf_word[0]|revBuf_word[1]);//上位8ビット、下位ビットを合成（ビットのORを取ることで格納する。）
-      // ※int ではなく　int16_t　にすることが必要。intだけだと、32ビットのintと解釈されマイナス値がマイナスとみなされなくなる、int16_tは、16ビット指定の整数型変換
-      revBuf_word[2] = (uint16_t(revBuf_byte[3])<< 8);//上位8ビットをbyteから、Wordに型変換して格納　上位桁にするため8ビットシフト
-      revBuf_word[3] = uint16_t(revBuf_byte[4]);//下位8ビットをbyteから、Wordに型変換して格納      
-      y = int16_t(revBuf_word[2]|revBuf_word[3]);//上位8ビット、下位ビットを合成（ビットのORを取ることで格納する。）
-      // ※int ではなく　int16_t　にすることが必要。intだけだと、32ビットのintと解釈されマイナス値がマイナスとみなされなくなる、int16_tは、16ビット指定の整数型変換
-      ball_get = revBuf_byte[5];
+  if((revBuf_byte[0] == 0xFF ) && ( revBuf_byte[6] == 0xAA )){
+  //いったんWORD型（16bitデータ）としてから、int16_tとする。
+    revBuf_word[0] = (uint16_t(revBuf_byte[1])<< 8);//上位8ビットをbyteから、Wordに型変換して格納　上位桁にするため8ビットシフト
+    revBuf_word[1] = uint16_t(revBuf_byte[2]);//下位8ビットをbyteから、Wordに型変換して格納      
+    x = int16_t(revBuf_word[0]|revBuf_word[1]);//上位8ビット、下位ビットを合成（ビットのORを取ることで格納する。）
+    // ※int ではなく　int16_t　にすることが必要。intだけだと、32ビットのintと解釈されマイナス値がマイナスとみなされなくなる、int16_tは、16ビット指定の整数型変換
+    revBuf_word[2] = (uint16_t(revBuf_byte[3])<< 8);//上位8ビットをbyteから、Wordに型変換して格納　上位桁にするため8ビットシフト
+    revBuf_word[3] = uint16_t(revBuf_byte[4]);//下位8ビットをbyteから、Wordに型変換して格納      
+    y = int16_t(revBuf_word[2]|revBuf_word[3]);//上位8ビット、下位ビットを合成（ビットのORを取ることで格納する。）
+    // ※int ではなく　int16_t　にすることが必要。intだけだと、32ビットのintと解釈されマイナス値がマイナスとみなされなくなる、int16_tは、16ビット指定の整数型変換
+    ball.get_resister(revBuf_byte[5]);
 
-      x = ball.ball_x.demandAve(x);
-      y = ball.ball_y.demandAve(y);
-    }
-    else{
-      // printf("ERR_REV");
-    }
+    x = ball.ball_x.demandAve(x);
+    y = ball.ball_y.demandAve(y);
+    // Serial.print("!!!!!!!!!!!!!");
   }
+  else{
+    // printf("ERR_REV");
+  }
+  
 }
