@@ -10,12 +10,14 @@ class Cam{
         int F = 0;
     public:
         Cam(int);
-        void begin();
+        int data_byte[4];
+        int getCamdata();
         float ang;
         float Size;
-        void print();
         int on = 0;
         int color = 0;
-        MA csize;
         int senter;
+        MA ang_;
+        void print();
+        void begin();
 };

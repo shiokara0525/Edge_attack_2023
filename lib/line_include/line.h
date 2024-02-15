@@ -18,7 +18,7 @@ public:
     double ang; //ラインの和のベクトルの角度
     float dis_X;
     float dis_Y;
-    int side_flag;
+    int side_flag;  //1は90°で検知、2は-90°で検知、3は0°、4は180°
     int num;
     int flag;
     int data_on[27];

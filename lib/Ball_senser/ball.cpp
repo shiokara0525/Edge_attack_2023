@@ -1,14 +1,14 @@
 #include<ball.h>
 
 BALL::BALL(){
-    ball_x.setLenth(3);
-    ball_y.setLenth(3);
+    ball_x.setLenth(10);
+    ball_y.setLenth(10);
     far__.setLenth(500);
 }
 
 
 void BALL::begin(){
-    Serial8.begin(57600);
+    Serial8.begin(115200);
 }
 
 
@@ -42,6 +42,7 @@ int BALL::getBallposition(){
     if(150 < abs(y)){
         y = (y < 0 ? -150 : 150);
     }
+    ball_get = get_;
     ang = degrees(atan2(y,x));
     far = sqrt(x_pos*x_pos + y_pos*y_pos);
     dx = (far - far_old);
@@ -52,17 +53,23 @@ int BALL::getBallposition(){
     return flag;
 }
 
+
+void BALL::get_resister(int n){
+    get_ = n;
+}
+
+
 void BALL::print(){
     Serial.print(" ang : ");
     Serial.print(ang);
     Serial.print(" far : ");
     Serial.print(far_);
-    Serial.print(" x : ");
-    Serial.print(x_pos);
-    Serial.print(" y : ");
-    Serial.print(y_pos);
-    Serial.print(" dx : ");
-    Serial.print(dx);
+    // Serial.print(" x : ");
+    // Serial.print(x_pos);
+    // Serial.print(" y : ");
+    // Serial.print(y_pos);
+    // Serial.print(" dx : ");
+    // Serial.print(dx);
     Serial.print(" catch : ");
     Serial.print(ball_get);
     Serial.print(" flag : ");

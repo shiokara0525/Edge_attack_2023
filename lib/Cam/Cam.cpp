@@ -2,8 +2,8 @@
 
 
 Cam::Cam(int flag){
-    csize.setLenth(20);
-    csize.reset();
+    ang_.setLenth(20);
+    ang_.reset();
     if(flag == 3){
         F = 3;
     }
@@ -24,14 +24,30 @@ void Cam::begin(){
 
 
 
+int Cam::getCamdata(){
+    if(data_byte[2] == 0){
+      on = 0;
+    }
+    else{
+      if(color == data_byte[0]){
+        on = 1;
+        ang = ang_.demandAve((data_byte[1] - 80)*3/4);
+        Size = data_byte[2];
+        senter = data_byte[3];
+      }
+    }
+    return on;
+}
+
+
 void Cam::print(){
     if(on == 0){
         Serial.print("No block detected");
     }
     else{
-        Serial.print("  ang: ");
+        Serial.print("  ang : ");
         Serial.print(ang);
-        Serial.print("  size: ");
+        Serial.print("  size : ");
         Serial.print(Size);
         Serial.print(" senter : ");
         Serial.print(senter);
