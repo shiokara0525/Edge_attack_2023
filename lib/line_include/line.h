@@ -11,6 +11,7 @@ public:
     int switchLineflag(angle);
     float decideGoang(angle,int);
     void print();
+    void print_2();
     void begin();
     LINE();
 

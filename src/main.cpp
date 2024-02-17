@@ -24,7 +24,7 @@ const int ang_90 = 170;
 const int ang_30 = 80;
 const int ang_10 = 10;
 const int far_th = 130;
-int go_val = 150;
+int go_val = 180;
 int print_flag = 1;// 1だったらシリアルプリントする
 //======================================================きっく======================================================//
 void kick();
@@ -170,7 +170,7 @@ void loop() {
       kick_flag = 0;
     }
 
-    if(cam_front.on == 1){
+    if(cam_front.on == 1 && abs(cam_front.ang) < 40){
       AC_flag = 1;
     }
     else{
@@ -269,28 +269,25 @@ void loop() {
     Serial.print(" | ");
     Serial.print(go_ang.degree);
     // Serial.print(" | ");
-    // Serial.print(" ac : ");
-    // Serial.print(AC_flag);
-    // Serial.print(" | ");
     // ball.print();
+    // Serial.print(" | ");
+    // line.print();
     Serial.print(" | ");
-    line.print();
+    line.print_2();
     // Serial.print(" | ");
     // ac.print();
-    // Serial.print(" time : ");
-    // Serial.print(Main.read_us());
-    // Serial.print(" | ");
-    // cam_front.print();
+    Serial.print(" | ");
+    cam_front.print();
     // Serial.print(" | ");
     // Serial.print(L_time);
     // Serial.print(" | ");
     // Serial.print(M_time);
   }
 
-  if(toogle_f != digitalRead(toogle_P)){
-    MOTOR.motor_0();
-    Switch();
-  }
+  // if(toogle_f != digitalRead(toogle_P)){
+  //   MOTOR.motor_0();
+  //   Switch();
+  // }
   Serial.println();
   M_time = Main.read_us();
 }
@@ -298,17 +295,24 @@ void loop() {
 
 
 void Switch(){
+  // digitalWrite(LED,HIGH);
+  // toogle_f = digitalRead(toogle_P);
+  // delay(100);
+  // while(digitalRead(toogle_P) == toogle_f);
+  // digitalWrite(LED,LOW);
+  // ac.setup_2();
+  // Target_dir = ac.dir_n;
+  // toogle_f = digitalRead(toogle_P);
+  // delay(100);
+  // while(digitalRead(toogle_P) == toogle_f);
+  // toogle_f = digitalRead(toogle_P);  //トグルがもげちゃったからいったんLチカでスタート
   digitalWrite(LED,HIGH);
-  toogle_f = digitalRead(toogle_P);
-  delay(100);
-  while(digitalRead(toogle_P) == toogle_f);
+  delay(1000);
   digitalWrite(LED,LOW);
   ac.setup_2();
   Target_dir = ac.dir_n;
-  toogle_f = digitalRead(toogle_P);
-  delay(100);
-  while(digitalRead(toogle_P) == toogle_f);
-  toogle_f = digitalRead(toogle_P);
+  delay(1000);
+  digitalWrite(LED,HIGH);
 }
 
 
@@ -345,16 +349,14 @@ void serialEvent3(){
 
   if(reBuf[0] == 38 && reBuf[5] == 37){
     for(int i = 0; i < 4; i++){
-      cam_front.data_byte[i] = reBuf[i+1];
+      cam_back.data_byte[i] = reBuf[i+1];
     }
   }
 
   for(int i = 0; i < 6; i++){
-    // Serial.print(reBuf[i]);
     // Serial.print(" ");
+    // Serial.print(reBuf[i]);
   }
-  // Serial.println();
-  // Serial.print("sawa");
 }
 
 

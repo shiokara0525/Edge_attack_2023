@@ -45,8 +45,8 @@ float AC::getCam_val(float c_ang_){
   
   val = kkp + kkd;  //最終的に返す値を計算
   ac_timer.reset();
-  Serial.print(" val : ");
-  Serial.print(val);
+  // Serial.print(" val : ");
+  // Serial.print(val);
 
   return val;  //値返す
 }
