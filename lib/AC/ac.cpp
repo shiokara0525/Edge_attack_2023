@@ -32,12 +32,6 @@ float AC::getCam_val(float c_ang_){
   c_ang = c_ang_;
   kkp = -c_ang;  //比例制御の値を計算
   kkd = ((kkp - kkp_old) * time);  //微分制御の値を計算
-  Serial.print(" kkp : ");
-  Serial.print(kkp);
-  Serial.print(" kkp_old : ");
-  Serial.print(kkp_old);
-  Serial.print(" kkd : ");
-  Serial.print(kkd);
   kkp_old = kkp;
 
   kkp *= kp;
@@ -96,5 +90,6 @@ void AC::setup_2(){
   bno.getEvent(&event);
 
   dir_target = event.orientation.x;
+  dir_n = event.orientation.x;
   this->first = dir_target;
 }

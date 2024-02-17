@@ -14,15 +14,17 @@ AC ac;
 motor_attack MOTOR;
 timer Timer;
 timer Main;
+int M_time;
+timer L_;
 
 int A = 0;
 int B = 999;
-const int ang_180 = 230;
-const int ang_90 = 140;
-const int ang_30 = 90;
-const int ang_10 = 20;
+const int ang_180 = 210;
+const int ang_90 = 170;
+const int ang_30 = 80;
+const int ang_10 = 10;
 const int far_th = 130;
-int go_val = 200;
+int go_val = 150;
 int print_flag = 1;// 1だったらシリアルプリントする
 //======================================================きっく======================================================//
 void kick();
@@ -49,8 +51,11 @@ int LED = 13;
 int toogle_f;
 int toogle_P = 27;
 void Switch();
+int Target_dir;
 //======================================================ライン======================================================//
 int Line_flag = 0;
+int Line_target_dir;
+int L_time;
 //======================================================関数たち======================================================/
 
 void setup() {
@@ -75,6 +80,9 @@ void setup() {
     cam_front.color = 1;  //青が0 黄色が1
     cam_back.color = 0;  //青が0 黄色が1
   }
+  // MOTOR.motor_ac(100);
+  // delay(200);
+  // MOTOR.motor_0();
   Switch();
 }
 
@@ -89,6 +97,7 @@ void loop() {
   int AC_flag = 0; //0だったら絶対的な角度とる 1だったらゴール向く
   int kick_ = 0; //0だったらキックしない 1だったらキック
   int M_flag = 1; //1だったら動き続ける 0だったら止まる
+  float target = Target_dir;
 
   if(line_flag == 1){
     A = 20;
@@ -99,7 +108,7 @@ void loop() {
     }
     else{
       if(ball.flag == 1){
-        if(ball.ball_get == 1 || ball.ball_get == 2){
+        if(1 <= ball.ball_get){
           A = 11;
         }
         else{
@@ -123,6 +132,7 @@ void loop() {
   if(A == 10){  //回り込むやつ
     if(A != B){
       B = A;
+      Timer.reset();
     }
     int ang_180_ = ang_180;
     int ang_90_ = ang_90;
@@ -136,9 +146,7 @@ void loop() {
       go_ang = ang_10_ / 10.0 * ball.ang;
     }
     else if(abs(ball.ang) < 30){
-      max_val -= 100;
       go_ang = ((ang_30_ - ang_10_) / 20.0 * (abs(ball.ang) - 10) + ang_10_);
-
     }
     else if(abs(ball.ang) < 90){
       go_ang = ((ang_90_ - ang_30_) / 60.0 * (abs(ball.ang) - 30) + ang_30_);
@@ -148,6 +156,10 @@ void loop() {
     }
 
     go_ang = go_ang.degree * (ball.ang < 0 ? -1 : 1);
+
+    if(180 < ball.far){
+      go_ang = ball.ang;
+    }
   }
 
 
@@ -157,7 +169,13 @@ void loop() {
       Timer.reset();
       kick_flag = 0;
     }
-    AC_flag = 1;
+
+    if(cam_front.on == 1){
+      AC_flag = 1;
+    }
+    else{
+      AC_flag = 0;
+    }
     if(abs(cam_front.ang) < 10 || cam_front.senter == 1){
       if(kick_flag == 0 && 200 < Timer.read_ms()){
         kick_ = 1;
@@ -176,12 +194,21 @@ void loop() {
     angle line_ang(line.ang,true);
     if(A != B){
       B = A;
-      Line_flag = line.switchLineflag(line_ang);
+      if(50 < Timer.read_ms()){
+        Line_target_dir = ac.dir_n;
+        Line_flag = line.switchLineflag(line_ang);
+      }
+      Timer.reset();
     }
+    target = Line_target_dir;
     go_ang = line.decideGoang(line_ang,Line_flag);
   }
 
   if(A == 21){
+    if(A != B){
+      B = A;
+      Timer.reset();
+    }
     if(line.side_flag == 1){
       go_ang = -90;
     }
@@ -197,12 +224,12 @@ void loop() {
   }
 
 
-
+  ac.dir_target = target;
   if(AC_flag == 0){
-    AC_val = ac.getAC_val();
+    AC_val = ac.getAC_val() * 2;
   }
   else if(AC_flag == 1){
-    AC_val = ac.getCam_val(cam_front.ang);
+    AC_val = ac.getCam_val(cam_front.ang) * 2;
   }
 
   if(kick_ == 1){
@@ -230,6 +257,8 @@ void loop() {
     }
   }
 
+  digitalWrite(LED,cam_front.on);
+
   if(M_flag == 1){
     MOTOR.moveMotor_0(go_ang,max_val,AC_val,0);
   }
@@ -244,7 +273,7 @@ void loop() {
     // Serial.print(AC_flag);
     // Serial.print(" | ");
     // ball.print();
-    // Serial.print(" | ");
+    Serial.print(" | ");
     line.print();
     // Serial.print(" | ");
     // ac.print();
@@ -252,6 +281,10 @@ void loop() {
     // Serial.print(Main.read_us());
     // Serial.print(" | ");
     // cam_front.print();
+    // Serial.print(" | ");
+    // Serial.print(L_time);
+    // Serial.print(" | ");
+    // Serial.print(M_time);
   }
 
   if(toogle_f != digitalRead(toogle_P)){
@@ -259,6 +292,7 @@ void loop() {
     Switch();
   }
   Serial.println();
+  M_time = Main.read_us();
 }
 
 
@@ -270,6 +304,7 @@ void Switch(){
   while(digitalRead(toogle_P) == toogle_f);
   digitalWrite(LED,LOW);
   ac.setup_2();
+  Target_dir = ac.dir_n;
   toogle_f = digitalRead(toogle_P);
   delay(100);
   while(digitalRead(toogle_P) == toogle_f);
@@ -353,6 +388,7 @@ void serialEvent4(){
 
 
 void serialEvent6(){
+  L_time = L_.read_us();
   // Serial.println(" sawa3 ");
   uint8_t read[6];
   int n = 1;
@@ -387,6 +423,7 @@ void serialEvent6(){
   //   Serial.print(" ");
   // }
   // Serial.println();
+  L_.reset();
 }
 
 

@@ -36,10 +36,10 @@ int LINE::getLINE_Vec() { //ラインのベクトル(距離,角度)を取得す�
     }
   }
 
-  data_on[26] = 0;
+  // data_on[26] = 0;
 
   for(int i = 0; i < 24; i++){
-    if(i == 17 || i == 22){
+    if(i == 6 || i == 20 || i == 23){
       continue;
     }
     if(flag == 0){
@@ -56,15 +56,15 @@ int LINE::getLINE_Vec() { //ラインのベクトル(距離,角度)を取得す�
       }
     }
 
-    if(i == 23){
-      if(data_on[23] == 1 && data_on[0] == 1){
+    if(i == 22){         //23がくるってるから応急措置 治ったら22のとこ全部23にする!!!!!!!!!!
+      if(data_on[22] == 1 && data_on[0] == 1){
         block_first[0] = block_first[block_num];
         block_first[block_num] = 0;
         block_num--;
       }
 
-      if(data_on[23] == 1 && data_on[0] == 0){
-        block_last[block_num] = 23;
+      if(data_on[22] == 1 && data_on[0] == 0){
+        block_last[block_num] = 22;
       }
     }
   }
@@ -137,7 +137,7 @@ float LINE::decideGoang(angle linedir,int line_flag){
   float goang = 0;
   linedir.to_range(-15,false);
   for(int i = 0; i < 12; i++){  //角度を12つに区分して、それぞれどの区分にいるか判定する
-    if(-15 +(i * 30) < linedir.degree && linedir.degree <= 15 +(i * 30)){  //時計回りにどの区分にいるか判定してるよ
+    if(-15 +(i * 30) <= linedir.degree && linedir.degree < 15 +(i * 30)){  //時計回りにどの区分にいるか判定してるよ
       goang = line_switch(i,linedir.degree,line_flag);
     }
   }
