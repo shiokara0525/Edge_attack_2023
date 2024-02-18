@@ -20,7 +20,7 @@ timer L_;
 int A = 0;
 int B = 999;
 const int ang_180 = 210;
-const int ang_90 = 170;
+const int ang_90 = 185;
 const int ang_30 = 80;
 const int ang_10 = 10;
 const int far_th = 130;
@@ -177,12 +177,12 @@ void loop() {
       AC_flag = 0;
     }
     if(abs(cam_front.ang) < 10 || cam_front.senter == 1){
-      if(kick_flag == 0 && 200 < Timer.read_ms()){
+      if(kick_flag == 0 && 100 < Timer.read_ms()){
         kick_ = 1;
         kick_flag = 1;
         Timer.reset();
       }
-      else if(kick_flag == 1 && 400 < Timer.read_ms()){
+      else if(kick_flag == 1 && 100 < Timer.read_ms()){
         kick_ = 1;
         Timer.reset();
       }
@@ -194,10 +194,8 @@ void loop() {
     angle line_ang(line.ang,true);
     if(A != B){
       B = A;
-      if(50 < Timer.read_ms()){
-        Line_target_dir = ac.dir_n;
-        Line_flag = line.switchLineflag(line_ang);
-      }
+      Line_target_dir = ac.dir_n;
+      Line_flag = line.switchLineflag(line_ang);
       Timer.reset();
     }
     target = Line_target_dir;
@@ -270,10 +268,10 @@ void loop() {
     Serial.print(go_ang.degree);
     // Serial.print(" | ");
     // ball.print();
-    // Serial.print(" | ");
-    // line.print();
     Serial.print(" | ");
-    line.print_2();
+    line.print();
+    // Serial.print(" | ");
+    // line.print_2();
     // Serial.print(" | ");
     // ac.print();
     Serial.print(" | ");

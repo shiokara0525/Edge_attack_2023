@@ -13,6 +13,7 @@ public:
     void print();
     void print_2();
     void begin();
+    double line_switch(int,double,int); 
     LINE();
 
     double dis; //ラインのベクトルの長さ
@@ -32,5 +33,6 @@ public:
 
 private:
     double PI = 3.1415926535897932384626; //円周率
+    int A = 0;
     timer timer1; //タイマーの宣言
 };

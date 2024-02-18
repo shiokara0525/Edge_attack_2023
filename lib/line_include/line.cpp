@@ -125,9 +125,6 @@ int LINE::switchLineflag(angle linedir){
 }
 
 
-double line_switch(int,double,int);
-
-
 float LINE::decideGoang(angle linedir,int line_flag){
   float goang = 0;
   linedir.to_range(-15,false);
@@ -140,21 +137,25 @@ float LINE::decideGoang(angle linedir,int line_flag){
 }
 
 
-double line_switch(int i,double ang,int line_flag){  //ラインを踏みこしてるときの処理とか判定とか書いてあるよ
+double LINE::line_switch(int i,double ang,int line_flag){  //ラインを踏みこしてるときの処理とか判定とか書いてあるよ
+  A = 0;
   angle go_(i*30-180,true);
   if(line_flag <= 3){
     if(3 + line_flag <= i && i <= 8 + line_flag){
       go_ = line_flag * 30 - 180;
+      A++;
     }
   }
   else if(4 <= line_flag && line_flag <= 8){
     if(i <= line_flag - 4 || line_flag + 3 <= i){
       go_ = line_flag * 30 - 180;
+      A++;
     }
   }
   else if(9 <= line_flag){
     if(line_flag - 9 <= i && i <= line_flag - 4){
       go_ = line_flag * 30 - 180;
+      A++;
     }
   }
   go_.to_range(-180,false);
@@ -180,6 +181,8 @@ void LINE::print(){
   Serial.print(side_flag);
   Serial.print(" flag : ");
   Serial.print(line_flag);
+  Serial.print(" A_ : ");
+  Serial.print(A);
 }
 
 
