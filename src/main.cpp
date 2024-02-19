@@ -21,7 +21,7 @@ int A = 0;
 int B = 999;
 const int ang_180 = 210;
 const int ang_90 = 185;
-const int ang_30 = 80;
+const int ang_30 = 70;
 const int ang_10 = 10;
 const int far_th = 130;
 int go_val = 180;
@@ -176,17 +176,31 @@ void loop() {
     else{
       AC_flag = 0;
     }
-    if(abs(cam_front.ang) < 10 || cam_front.senter == 1){
-      if(kick_flag == 0 && 100 < Timer.read_ms()){
+    if(cam_front.Size < 60){
+      if(abs(cam_front.ang) < 8 && cam_front.senter == 1){
+        if(kick_flag == 0 && 200 < Timer.read_ms()){
+          kick_ = 1;
+          kick_flag = 1;
+          Timer.reset();
+        }
+        else if(kick_flag == 1 && 300 < Timer.read_ms()){
+          kick_ = 1;
+          Timer.reset();
+        }
+      }
+    }
+    else{
+      if(kick_flag == 0 && 150 < Timer.read_ms()){
         kick_ = 1;
         kick_flag = 1;
         Timer.reset();
       }
-      else if(kick_flag == 1 && 100 < Timer.read_ms()){
+      else if(kick_flag == 1 && 300 < Timer.read_ms()){
         kick_ = 1;
         Timer.reset();
       }
     }
+
     go_ang = 0;
   }
 
@@ -264,18 +278,18 @@ void loop() {
     MOTOR.motor_0();
   }
   if(print_flag == 1){
-    Serial.print(" | ");
-    Serial.print(go_ang.degree);
+    // Serial.print(" | ");
+    // Serial.print(go_ang.degree);
     // Serial.print(" | ");
     // ball.print();
     Serial.print(" | ");
     line.print();
-    // Serial.print(" | ");
-    // line.print_2();
+    Serial.print(" | ");
+    line.print_2();
     // Serial.print(" | ");
     // ac.print();
-    Serial.print(" | ");
-    cam_front.print();
+    // Serial.print(" | ");
+    // cam_front.print();
     // Serial.print(" | ");
     // Serial.print(L_time);
     // Serial.print(" | ");

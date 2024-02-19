@@ -36,12 +36,9 @@ int LINE::getLINE_Vec() { //ラインのベクトル(距離,角度)を取得す�
     }
   }
 
-  // data_on[26] = 0;
+  data_on[26] = 0;
 
   for(int i = 0; i < 24; i++){
-    if((3 <= i && i <= 6) || i == 20 || i == 23){
-      continue;
-    }
     if(flag == 0){
       if(data_on[i] == 1){
         block_num++;
@@ -56,15 +53,15 @@ int LINE::getLINE_Vec() { //ラインのベクトル(距離,角度)を取得す�
       }
     }
 
-    if(i == 22){         //23がくるってるから応急措置 治ったら22のとこ全部23にする!!!!!!!!!!
-      if(data_on[22] == 1 && data_on[0] == 1){
+    if(i == 23){         //23がくるってるから応急措置 治ったら22のとこ全部23にする!!!!!!!!!!
+      if(data_on[23] == 1 && data_on[0] == 1){
         block_first[0] = block_first[block_num];
         block_first[block_num] = 0;
         block_num--;
       }
 
-      if(data_on[22] == 1 && data_on[0] == 0){
-        block_last[block_num] = 22;
+      if(data_on[23] == 1 && data_on[0] == 0){
+        block_last[block_num] = 23;
       }
     }
   }
