@@ -7,6 +7,7 @@
 #include<MA.h>
 #include<timer.h>
 #include<Cam.h>
+#include<BLDC.h>
 
 BALL ball;
 LINE line;
@@ -14,6 +15,7 @@ AC ac;
 motor_attack MOTOR;
 timer Timer;
 timer Main;
+BLDC dribbler;
 int M_time;
 timer L_;
 
@@ -27,7 +29,6 @@ const int far_th = 130;
 int go_val = 180;
 int print_flag = 1;// 1だったらシリアルプリントする
 //======================================================きっく======================================================//
-void kick();
 timer kick_time;
 int Kick_F = 0;
 const int C = 32;
@@ -72,6 +73,7 @@ void setup() {
   pinMode(C,OUTPUT);
   digitalWrite(C,HIGH);
   digitalWrite(K,LOW);
+  dribbler.setup();
   if(goal_color == 0){
     cam_front.color = 0;  //青が0 黄色が1
     cam_back.color = 1;  //青が0 黄色が1
@@ -278,14 +280,14 @@ void loop() {
     MOTOR.motor_0();
   }
   if(print_flag == 1){
-    // Serial.print(" | ");
-    // Serial.print(go_ang.degree);
-    // Serial.print(" | ");
-    // ball.print();
     Serial.print(" | ");
-    line.print();
+    Serial.print(go_ang.degree);
     Serial.print(" | ");
-    line.print_2();
+    ball.print();
+    // Serial.print(" | ");
+    // line.print();
+    // Serial.print(" | ");
+    // line.print_2();
     // Serial.print(" | ");
     // ac.print();
     // Serial.print(" | ");
@@ -325,22 +327,6 @@ void Switch(){
   Target_dir = ac.dir_n;
   delay(1000);
   digitalWrite(LED,HIGH);
-}
-
-
-
-void kick(){
-  // esc.writeMicroseconds(1000);
-  digitalWrite(C,LOW);
-  delay(10);
-  digitalWrite(K,HIGH);
-  digitalWrite(LED,HIGH);
-  delay(10);
-  digitalWrite(K,LOW);
-  digitalWrite(LED,LOW);
-  delay(10);
-  digitalWrite(C,HIGH);
-  // MOTOR.Moutput(4,-200);
 }
 
 
