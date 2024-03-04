@@ -99,6 +99,7 @@ void loop() {
   int AC_flag = 0; //0だったら絶対的な角度とる 1だったらゴール向く
   int kick_ = 0; //0だったらキックしない 1だったらキック
   int M_flag = 1; //1だったら動き続ける 0だったら止まる
+  int dribbler_flag = 0;
   float target = Target_dir;
 
   if(line_flag == 1){
@@ -145,6 +146,7 @@ void loop() {
     }
 
     if(abs(ball.ang) < 10){
+      dribbler_flag = 1;
       go_ang = ang_10_ / 10.0 * ball.ang;
     }
     else if(abs(ball.ang) < 30){
@@ -171,28 +173,10 @@ void loop() {
       Timer.reset();
       kick_flag = 0;
     }
+    dribbler_flag = 1;
 
-    if(cam_front.on == 1 && abs(cam_front.ang) < 40){
-      AC_flag = 1;
-    }
-    else{
-      AC_flag = 0;
-    }
-    if(cam_front.Size < 60){
-      if(abs(cam_front.ang) < 8 && cam_front.senter == 1){
-        if(kick_flag == 0 && 200 < Timer.read_ms()){
-          kick_ = 1;
-          kick_flag = 1;
-          Timer.reset();
-        }
-        else if(kick_flag == 1 && 300 < Timer.read_ms()){
-          kick_ = 1;
-          Timer.reset();
-        }
-      }
-    }
-    else{
-      if(kick_flag == 0 && 150 < Timer.read_ms()){
+    if(abs(cam_front.ang) < 10){
+      if(kick_flag == 0 && 200 < Timer.read_ms()){
         kick_ = 1;
         kick_flag = 1;
         Timer.reset();
@@ -201,6 +185,15 @@ void loop() {
         kick_ = 1;
         Timer.reset();
       }
+      go_ang = 0;
+      AC_flag = 1;
+    }
+    else if(abs(cam_front.ang) < 40){
+      go_ang = cam_front.ang * 3;
+      AC_flag = 1;
+    }
+    else{
+      go_ang = 180;
     }
 
     go_ang = 0;
@@ -286,8 +279,8 @@ void loop() {
     ball.print();
     // Serial.print(" | ");
     // line.print();
-    // Serial.print(" | ");
-    // line.print_2();
+    Serial.print(" | ");
+    line.print_2();
     // Serial.print(" | ");
     // ac.print();
     // Serial.print(" | ");
@@ -298,10 +291,10 @@ void loop() {
     // Serial.print(M_time);
   }
 
-  // if(toogle_f != digitalRead(toogle_P)){
-  //   MOTOR.motor_0();
-  //   Switch();
-  // }
+  if(toogle_f != digitalRead(toogle_P)){
+    MOTOR.motor_0();
+    Switch();
+  }
   Serial.println();
   M_time = Main.read_us();
 }
@@ -309,24 +302,17 @@ void loop() {
 
 
 void Switch(){
-  // digitalWrite(LED,HIGH);
-  // toogle_f = digitalRead(toogle_P);
-  // delay(100);
-  // while(digitalRead(toogle_P) == toogle_f);
-  // digitalWrite(LED,LOW);
-  // ac.setup_2();
-  // Target_dir = ac.dir_n;
-  // toogle_f = digitalRead(toogle_P);
-  // delay(100);
-  // while(digitalRead(toogle_P) == toogle_f);
-  // toogle_f = digitalRead(toogle_P);  //トグルがもげちゃったからいったんLチカでスタート
   digitalWrite(LED,HIGH);
-  delay(1000);
+  toogle_f = digitalRead(toogle_P);
+  delay(100);
+  while(digitalRead(toogle_P) == toogle_f);
   digitalWrite(LED,LOW);
   ac.setup_2();
   Target_dir = ac.dir_n;
-  delay(1000);
-  digitalWrite(LED,HIGH);
+  toogle_f = digitalRead(toogle_P);
+  delay(100);
+  while(digitalRead(toogle_P) == toogle_f);
+  toogle_f = digitalRead(toogle_P);
 }
 
 
