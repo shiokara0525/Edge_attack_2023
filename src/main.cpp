@@ -27,6 +27,8 @@ const int ang_30 = 70;
 const int ang_10 = 10;
 const int far_th = 130;
 int go_val = 180;
+int go_val_back = 255;
+int back_flag = 0;
 int print_flag = 1;// 1だったらシリアルプリントする
 //======================================================きっく======================================================//
 timer kick_time;
@@ -73,7 +75,7 @@ void setup() {
   pinMode(C,OUTPUT);
   digitalWrite(C,HIGH);
   digitalWrite(K,LOW);
-  dribbler.setup();
+  // dribbler.setup();
   if(goal_color == 0){
     cam_front.color = 0;  //青が0 黄色が1
     cam_back.color = 1;  //青が0 黄色が1
@@ -207,6 +209,7 @@ void loop() {
       Line_flag = line.switchLineflag(line_ang);
       Timer.reset();
     }
+    back_flag = 1;
     target = Line_target_dir;
     go_ang = line.decideGoang(line_ang,Line_flag);
   }
@@ -272,6 +275,11 @@ void loop() {
   else if(M_flag == 0){
     MOTOR.motor_0();
   }
+
+  if(back_flag == 1){
+    max_val = go_val_back;
+  }
+
   if(print_flag == 1){
     Serial.print(" | ");
     Serial.print(go_ang.degree);
@@ -279,23 +287,23 @@ void loop() {
     ball.print();
     // Serial.print(" | ");
     // line.print();
-    Serial.print(" | ");
-    line.print_2();
+    // Serial.print(" | ");
+    // line.print_2();
     // Serial.print(" | ");
     // ac.print();
-    // Serial.print(" | ");
-    // cam_front.print();
+    Serial.print(" | ");
+    cam_front.print();
     // Serial.print(" | ");
     // Serial.print(L_time);
     // Serial.print(" | ");
     // Serial.print(M_time);
+    Serial.println();
   }
 
   if(toogle_f != digitalRead(toogle_P)){
     MOTOR.motor_0();
     Switch();
   }
-  Serial.println();
   M_time = Main.read_us();
 }
 
