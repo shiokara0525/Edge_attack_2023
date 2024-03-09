@@ -18,7 +18,7 @@ class BALL{
         float far_;
         int get_val;
         int ball_get;
-        int get_th = 90;
+        int get_th = 100;
         BALL();
         int getBallposition();
         void print();
