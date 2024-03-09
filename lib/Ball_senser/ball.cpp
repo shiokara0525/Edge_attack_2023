@@ -1,8 +1,8 @@
 #include<ball.h>
 
 BALL::BALL(){
-    ball_x.setLenth(10);
-    ball_y.setLenth(10);
+    ball_x.setLenth(1);
+    ball_y.setLenth(1);
     far__.setLenth(500);
 }
 
