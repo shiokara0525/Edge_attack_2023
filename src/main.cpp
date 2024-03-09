@@ -18,13 +18,14 @@ timer Main;
 BLDC dribbler;
 int M_time;
 timer L_;
+timer B_;
 
 int A = 0;
 int B = 999;
 const int ang_180 = 210;
 const int ang_90 = 180;
-const int ang_30 = 75;
-const int ang_10 = 10;
+const int ang_30 = 90;
+const int ang_10 = 30;
 const int far_th = 130;
 int go_val = 210;
 int go_val_back = 255;
@@ -163,9 +164,9 @@ void loop() {
 
     go_ang = go_ang.degree * (ball.ang < 0 ? -1 : 1);
 
-    if(180 < ball.far){
-      go_ang = ball.ang;
-    }
+    // if(180 < ball.far){
+    //   go_ang = ball.ang;
+    // }
   }
 
 
@@ -175,10 +176,9 @@ void loop() {
       Timer.reset();
       kick_flag = 0;
     }
-    dribbler_flag = 1;
 
-    if(abs(cam_front.ang) < 10){
-      if(kick_flag == 0 && 200 < Timer.read_ms()){
+    if(1){
+      if(kick_flag == 0 && 400 < Timer.read_ms()){
         kick_ = 1;
         kick_flag = 1;
         Timer.reset();
@@ -190,15 +190,8 @@ void loop() {
       go_ang = 0;
       AC_flag = 1;
     }
-    else if(abs(cam_front.ang) < 40){
-      go_ang = cam_front.ang * 3;
-      AC_flag = 1;
-    }
-    else{
-      go_ang = 180;
-    }
-
     go_ang = 0;
+    AC_flag = 1;
   }
 
   if(A == 20){  //ラインから逃げるやつ
@@ -267,7 +260,11 @@ void loop() {
     }
   }
 
-  digitalWrite(LED,cam_front.on);
+  digitalWrite(LED,ball.ball_get);
+
+  if(back_flag == 1){
+    max_val = go_val_back;
+  }
 
   if(M_flag == 1){
     MOTOR.moveMotor_0(go_ang,max_val,AC_val,0);
@@ -276,9 +273,6 @@ void loop() {
     MOTOR.motor_0();
   }
 
-  if(back_flag == 1){
-    max_val = go_val_back;
-  }
 
   if(print_flag == 1){
     Serial.print(" | ");
@@ -373,10 +367,10 @@ void serialEvent4(){
     }
   }
 
-  for(int i = 0; i < 6; i++){
-    // Serial.print(" ");
-    // Serial.print(reBuf[i]);
-  }
+  // for(int i = 0; i < 6; i++){
+  //   Serial.print(" ");
+  //   Serial.print(reBuf[i]);
+  // }
 }
 
 
@@ -458,6 +452,7 @@ void serialEvent8(){
   //   Serial.print(revBuf_byte[i]);
   //   Serial.print(" ");
   // }
+  // Serial.println();
     //---------------------------
     //データの中身を確認
     //---------------------------
@@ -477,6 +472,8 @@ void serialEvent8(){
     x = ball.ball_x.demandAve(x);
     y = ball.ball_y.demandAve(y);
     // Serial.print("!!!!!!!!!!!!!");
+    // Serial.println(B_.read_ms());
+    // B_.reset();
   }
   else{
     // printf("ERR_REV");
