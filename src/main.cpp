@@ -26,9 +26,9 @@ int c = 0;
 const int ang_180 = 210;
 const int ang_90 = 180;
 const int ang_30 = 90;
-const int ang_10 = 30;
+const int ang_10 = 20;
 const int far_th = 130;
-int go_val = 170;
+int go_val = 160;
 int go_val_back = 255;
 int back_flag = 0;
 int print_flag = 1;// 1だったらシリアルプリントする
@@ -48,7 +48,7 @@ int Neo_p = 999;
 
 Adafruit_NeoPixel pixels(DELAYVAL, PIN, NEO_GRB + NEO_KHZ800);
 //======================================================カメラ======================================================//
-int goal_color = 0;  //青が0 黄色が1
+int goal_color = 1;  //青が0 黄色が1
 Cam cam_front(4);
 Cam cam_back(3);
 //======================================================スタートスイッチ======================================================//
@@ -108,28 +108,6 @@ void loop() {
   float target = Target_dir;
 
   c = 0;
-
-  // if(line_flag == 0){
-  //   if(Line_B != line_flag){
-  //     Line_B = line_flag;
-  //     if(5 <= line.line_flag && line.line_flag <= 7){
-  //       c = 1;
-  //       A = 22;
-  //       Serial.print(" 入った ");
-  //     }
-  //     Serial.print(" 入っている ");
-  //   }
-  //   Serial.print("cat");
-  // }
-  // else{
-  //   Line_B = 1;
-  // }
-
-  // if(A == 22){
-  //   if(abs(ball.ang) < 90){
-  //     c = 1;
-  //   }
-  // }
 
   if(c == 0){
     if(line_flag == 1){
