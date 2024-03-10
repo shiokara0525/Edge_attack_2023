@@ -46,7 +46,7 @@ int Neo_p = 999;
 
 Adafruit_NeoPixel pixels(DELAYVAL, PIN, NEO_GRB + NEO_KHZ800);
 //======================================================カメラ======================================================//
-int goal_color = 0;  //青が0 黄色が1
+int goal_color = 1;  //青が0 黄色が1
 Cam cam_front(4);
 Cam cam_back(3);
 //======================================================スタートスイッチ======================================================//
@@ -70,6 +70,7 @@ void setup() {
   cam_back.begin();
   pixels.begin();
   pixels.clear();
+  dribbler.setup();
   pinMode(LED,OUTPUT);
   pinMode(K,OUTPUT);
   pinMode(C,OUTPUT);
@@ -87,6 +88,7 @@ void setup() {
   // MOTOR.motor_ac(100);
   // delay(200);
   // MOTOR.motor_0();
+  dribbler.stop();
   Switch();
 }
 
@@ -102,6 +104,7 @@ void loop() {
   int kick_ = 0; //0だったらキックしない 1だったらキック
   int M_flag = 1; //1だったら動き続ける 0だったら止まる
   float target = Target_dir;
+  int dribbler_flag = 0;
 
   if(line_flag == 1){
     A = 20;
@@ -148,9 +151,11 @@ void loop() {
 
     if(abs(ball.ang) < 10){
       go_ang = ang_10_ / 10.0 * ball.ang;
+      dribbler_flag = 1;
     }
     else if(abs(ball.ang) < 30){
       go_ang = ((ang_30_ - ang_10_) / 20.0 * (abs(ball.ang) - 10) + ang_10_);
+      dribbler_flag = 1;
     }
     else if(abs(ball.ang) < 90){
       go_ang = ((ang_90_ - ang_30_) / 60.0 * (abs(ball.ang) - 30) + ang_30_);
@@ -189,6 +194,7 @@ void loop() {
     }
 
     go_ang = 0;
+    dribbler_flag = 1;
   }
 
   if(A == 20){  //ラインから逃げるやつ
@@ -257,6 +263,17 @@ void loop() {
     }
   }
 
+  if(dribbler_flag == 1){
+    dribbler.run();
+  }
+  else{
+    dribbler.stop();
+  }
+
+  if(back_flag == 1){
+    max_val = go_val_back;
+  }
+
   if(M_flag == 1){
     MOTOR.moveMotor_0(go_ang,max_val,AC_val,0);
   }
@@ -264,9 +281,6 @@ void loop() {
     MOTOR.motor_0();
   }
 
-  if(back_flag == 1){
-    max_val = go_val_back;
-  }
 
   if(print_flag == 1){
     Serial.print(" | ");
