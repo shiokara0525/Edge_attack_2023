@@ -22,12 +22,13 @@ timer B_;
 
 int A = 0;
 int B = 999;
+int c = 0;
 const int ang_180 = 210;
 const int ang_90 = 180;
 const int ang_30 = 90;
 const int ang_10 = 30;
 const int far_th = 130;
-int go_val = 210;
+int go_val = 170;
 int go_val_back = 255;
 int back_flag = 0;
 int print_flag = 1;// 1だったらシリアルプリントする
@@ -47,7 +48,7 @@ int Neo_p = 999;
 
 Adafruit_NeoPixel pixels(DELAYVAL, PIN, NEO_GRB + NEO_KHZ800);
 //======================================================カメラ======================================================//
-int goal_color = 1;  //青が0 黄色が1
+int goal_color = 0;  //青が0 黄色が1
 Cam cam_front(4);
 Cam cam_back(3);
 //======================================================スタートスイッチ======================================================//
@@ -60,6 +61,7 @@ int Target_dir;
 int Line_flag = 0;
 int Line_target_dir;
 int L_time;
+int Line_B = 999;
 //======================================================関数たち======================================================/
 
 void setup() {
@@ -105,24 +107,50 @@ void loop() {
   int dribbler_flag = 0;
   float target = Target_dir;
 
-  if(line_flag == 1){
-    A = 20;
-  }
-  else{
-    if(line.side_flag != 0){
-      A = 21;
+  c = 0;
+
+  // if(line_flag == 0){
+  //   if(Line_B != line_flag){
+  //     Line_B = line_flag;
+  //     if(5 <= line.line_flag && line.line_flag <= 7){
+  //       c = 1;
+  //       A = 22;
+  //       Serial.print(" 入った ");
+  //     }
+  //     Serial.print(" 入っている ");
+  //   }
+  //   Serial.print("cat");
+  // }
+  // else{
+  //   Line_B = 1;
+  // }
+
+  // if(A == 22){
+  //   if(abs(ball.ang) < 90){
+  //     c = 1;
+  //   }
+  // }
+
+  if(c == 0){
+    if(line_flag == 1){
+      A = 20;
     }
     else{
-      if(ball.flag == 1){
-        if(1 <= ball.ball_get){
-          A = 11;
-        }
-        else{
-          A = 10;
-        }
+      if(line.side_flag != 0){
+        A = 21;
       }
       else{
-        A = 5;
+        if(ball.flag == 1){
+          if(1 <= ball.ball_get){
+            A = 11;
+          }
+          else{
+            A = 10;
+          }
+        }
+        else{
+          A = 5;
+        }
       }
     }
   }
@@ -188,7 +216,6 @@ void loop() {
         Timer.reset();
       }
       go_ang = 0;
-      AC_flag = 1;
     }
     go_ang = 0;
     AC_flag = 1;
@@ -224,6 +251,14 @@ void loop() {
     else if(line.side_flag == 4){
       go_ang = 0;
     }
+  }
+
+
+  if(A == 22){
+    if(A != B){
+      B = A;
+    }
+    go_ang = 0;
   }
 
 
@@ -278,7 +313,9 @@ void loop() {
     Serial.print(" | ");
     Serial.print(go_ang.degree);
     Serial.print(" | ");
-    ball.print();
+    ac.print();
+    // Serial.print(" | ");
+    // ball.print();
     // Serial.print(" | ");
     // line.print();
     // Serial.print(" | ");
@@ -367,10 +404,11 @@ void serialEvent4(){
     }
   }
 
-  // for(int i = 0; i < 6; i++){
-  //   Serial.print(" ");
-  //   Serial.print(reBuf[i]);
-  // }
+  for(int i = 0; i < 6; i++){
+    Serial.print(" ");
+    Serial.print(reBuf[i]);
+  }
+  Serial.println();
 }
 
 
