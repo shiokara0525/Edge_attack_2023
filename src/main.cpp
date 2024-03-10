@@ -18,15 +18,13 @@ timer Main;
 BLDC dribbler;
 int M_time;
 timer L_;
-timer B_;
 
 int A = 0;
 int B = 999;
-int c = 0;
 const int ang_180 = 210;
 const int ang_90 = 180;
-const int ang_30 = 90;
-const int ang_10 = 20;
+const int ang_30 = 75;
+const int ang_10 = 10;
 const int far_th = 130;
 int go_val = 160;
 int go_val_back = 255;
@@ -48,7 +46,7 @@ int Neo_p = 999;
 
 Adafruit_NeoPixel pixels(DELAYVAL, PIN, NEO_GRB + NEO_KHZ800);
 //======================================================カメラ======================================================//
-int goal_color = 1;  //青が0 黄色が1
+int goal_color = 0;  //青が0 黄色が1
 Cam cam_front(4);
 Cam cam_back(3);
 //======================================================スタートスイッチ======================================================//
@@ -61,7 +59,6 @@ int Target_dir;
 int Line_flag = 0;
 int Line_target_dir;
 int L_time;
-int Line_B = 999;
 //======================================================関数たち======================================================/
 
 void setup() {
@@ -104,31 +101,26 @@ void loop() {
   int AC_flag = 0; //0だったら絶対的な角度とる 1だったらゴール向く
   int kick_ = 0; //0だったらキックしない 1だったらキック
   int M_flag = 1; //1だったら動き続ける 0だったら止まる
-  int dribbler_flag = 0;
   float target = Target_dir;
 
-  c = 0;
-
-  if(c == 0){
-    if(line_flag == 1){
-      A = 20;
+  if(line_flag == 1){
+    A = 20;
+  }
+  else{
+    if(line.side_flag != 0){
+      A = 21;
     }
     else{
-      if(line.side_flag != 0){
-        A = 21;
-      }
-      else{
-        if(ball.flag == 1){
-          if(1 <= ball.ball_get){
-            A = 11;
-          }
-          else{
-            A = 10;
-          }
+      if(ball.flag == 1){
+        if(1 <= ball.ball_get){
+          A = 11;
         }
         else{
-          A = 5;
+          A = 10;
         }
+      }
+      else{
+        A = 5;
       }
     }
   }
@@ -155,7 +147,6 @@ void loop() {
     }
 
     if(abs(ball.ang) < 10){
-      dribbler_flag = 1;
       go_ang = ang_10_ / 10.0 * ball.ang;
     }
     else if(abs(ball.ang) < 30){
@@ -170,9 +161,9 @@ void loop() {
 
     go_ang = go_ang.degree * (ball.ang < 0 ? -1 : 1);
 
-    // if(180 < ball.far){
-    //   go_ang = ball.ang;
-    // }
+    if(180 < ball.far){
+      go_ang = ball.ang;
+    }
   }
 
 
@@ -183,8 +174,8 @@ void loop() {
       kick_flag = 0;
     }
 
-    if(1){
-      if(kick_flag == 0 && 400 < Timer.read_ms()){
+    if(abs(cam_front.ang) < 10){
+      if(kick_flag == 0 && 200 < Timer.read_ms()){
         kick_ = 1;
         kick_flag = 1;
         Timer.reset();
@@ -194,9 +185,10 @@ void loop() {
         Timer.reset();
       }
       go_ang = 0;
+      AC_flag = 1;
     }
+
     go_ang = 0;
-    AC_flag = 1;
   }
 
   if(A == 20){  //ラインから逃げるやつ
@@ -229,14 +221,6 @@ void loop() {
     else if(line.side_flag == 4){
       go_ang = 0;
     }
-  }
-
-
-  if(A == 22){
-    if(A != B){
-      B = A;
-    }
-    go_ang = 0;
   }
 
 
@@ -273,12 +257,6 @@ void loop() {
     }
   }
 
-  digitalWrite(LED,ball.ball_get);
-
-  if(back_flag == 1){
-    max_val = go_val_back;
-  }
-
   if(M_flag == 1){
     MOTOR.moveMotor_0(go_ang,max_val,AC_val,0);
   }
@@ -286,14 +264,15 @@ void loop() {
     MOTOR.motor_0();
   }
 
+  if(back_flag == 1){
+    max_val = go_val_back;
+  }
 
   if(print_flag == 1){
     Serial.print(" | ");
     Serial.print(go_ang.degree);
     Serial.print(" | ");
-    ac.print();
-    // Serial.print(" | ");
-    // ball.print();
+    ball.print();
     // Serial.print(" | ");
     // line.print();
     // Serial.print(" | ");
@@ -386,7 +365,6 @@ void serialEvent4(){
     Serial.print(" ");
     Serial.print(reBuf[i]);
   }
-  Serial.println();
 }
 
 
@@ -468,7 +446,6 @@ void serialEvent8(){
   //   Serial.print(revBuf_byte[i]);
   //   Serial.print(" ");
   // }
-  // Serial.println();
     //---------------------------
     //データの中身を確認
     //---------------------------
@@ -488,8 +465,6 @@ void serialEvent8(){
     x = ball.ball_x.demandAve(x);
     y = ball.ball_y.demandAve(y);
     // Serial.print("!!!!!!!!!!!!!");
-    // Serial.println(B_.read_ms());
-    // B_.reset();
   }
   else{
     // printf("ERR_REV");
