@@ -23,10 +23,10 @@ int A = 0;
 int B = 999;
 const int ang_180 = 210;
 const int ang_90 = 180;
-const int ang_30 = 75;
+const int ang_30 = 90;
 const int ang_10 = 10;
 const int far_th = 130;
-int go_val = 160;
+int go_val = 210;
 int go_val_back = 255;
 int back_flag = 0;
 int print_flag = 1;// 1だったらシリアルプリントする
@@ -70,7 +70,7 @@ void setup() {
   cam_back.begin();
   pixels.begin();
   pixels.clear();
-  dribbler.setup();
+  // dribbler.setup();
   pinMode(LED,OUTPUT);
   pinMode(K,OUTPUT);
   pinMode(C,OUTPUT);
@@ -88,11 +88,11 @@ void setup() {
   // MOTOR.motor_ac(100);
   // delay(200);
   // MOTOR.motor_0();
-  dribbler.stop();
-  delay(100);
-  dribbler.run();
-  delay(200);
-  dribbler.stop();
+  // dribbler.stop();
+  // delay(100);
+  // dribbler.run();
+  // delay(200);
+  // dribbler.stop();
   Switch();
 }
 
@@ -137,7 +137,6 @@ void loop() {
       B = A;
     }
     M_flag = 0;
-    MOTOR.motor_0();
   }
 
   if(A == 10){  //回り込むやつ
@@ -183,7 +182,7 @@ void loop() {
       kick_flag = 0;
     }
 
-    if(abs(cam_front.ang) < 10){
+    if(abs(cam_front.ang) < 10 || cam_front.senter == 1){
       if(kick_flag == 0 && 200 < Timer.read_ms()){
         kick_ = 1;
         kick_flag = 1;
@@ -196,8 +195,13 @@ void loop() {
       go_ang = 0;
       AC_flag = 1;
     }
+    // else if(cam_front.on == 1){
+    //   go_ang = cam_front.ang * 3;
+    // }
+    // else{
+    //   go_ang = 180;
+    // }
 
-    go_ang = 0;
     dribbler_flag = 1;
   }
 
@@ -235,12 +239,13 @@ void loop() {
 
 
   ac.dir_target = target;
-  if(AC_flag == 0){
-    AC_val = ac.getAC_val() * 2;
-  }
-  else if(AC_flag == 1){
-    AC_val = ac.getCam_val(cam_front.ang) * 2;
-  }
+  // if(AC_flag == 0){
+  //   AC_val = ac.getAC_val() * 2;
+  // }
+  // else if(AC_flag == 1){
+  //   AC_val = ac.getCam_val(-cam_front.ang) * 2;
+  // }
+  AC_val = ac.getCam_val(cam_front.ang);
 
   if(kick_ == 1){
     if(Kick_F == 0){
@@ -267,34 +272,38 @@ void loop() {
     }
   }
 
-  if(dribbler_flag == 1){
-    dribbler.run();
-  }
-  else{
-    dribbler.stop();
-  }
+  // if(dribbler_flag == 1){
+  //   dribbler.run();
+  // }
+  // else{
+  //   dribbler.stop();
+  // }
 
   if(back_flag == 1){
     max_val = go_val_back;
   }
 
-  if(M_flag == 1){
-    // MOTOR.moveMotor_0(go_ang,max_val,AC_val,0);
-  }
-  else if(M_flag == 0){
-    MOTOR.motor_0();
-  }
+  // if(M_flag == 1){
+  //   MOTOR.moveMotor_0(go_ang,max_val,AC_val,0);
+  // }
+  // else if(M_flag == 0){
+  //   MOTOR.motor_0();
+  // }
+  go_ang = 0;
+
+  MOTOR.moveMotor_0(go_ang,210,AC_val,0);
 
 
   if(print_flag == 1){
     Serial.print(" | A : ");
     Serial.print(A);
-    Serial.print(" | ");
-    Serial.print(go_ang.degree);
-    Serial.print(" | ");
-    ball.print();
-    Serial.print(" | dribller_flag : ");
-    Serial.print(dribbler_flag);
+    Serial.print(" | AC_val : ");
+    Serial.print(AC_val);
+    // Serial.print(go_ang.degree);
+    // Serial.print(" | ");
+    // ball.print();
+    // Serial.print(" | dribller_flag : ");
+    // Serial.print(dribbler_flag);
     // Serial.print(" | ");
     // line.print();
     // Serial.print(" | ");

@@ -34,8 +34,8 @@ float AC::getCam_val(float c_ang_){
   kkd = ((kkp - kkp_old) * time);  //微分制御の値を計算
   kkp_old = kkp;
 
-  kkp *= kp;
-  kkd *= kd;
+  kkp *= kp_c;
+  kkd *= kd_c;
   if(150 < abs(kkp)){
     kkp = (kkp < 0 ? -150 : 150);
   }
