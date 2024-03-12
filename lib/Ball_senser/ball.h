@@ -8,6 +8,7 @@ class BALL{
         MA ball_x;
         MA ball_y;
         MA far__;
+        MA ball_get_val;
         float ang;
         float far;
         float far_old = 0;

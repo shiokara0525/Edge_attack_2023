@@ -3,6 +3,7 @@
 BALL::BALL(){
     ball_x.setLenth(1);
     ball_y.setLenth(1);
+    ball_get_val.setLenth(50);
     far__.setLenth(500);
 }
 
@@ -15,7 +16,7 @@ void BALL::begin(){
 int BALL::getBallposition(){
     float x = ball_x.returnAve();
     float y = ball_y.returnAve();
-    if(x == 0 || y == 0){
+    if(x == 0 && y == 0){
         flag = 0;
         return flag;
     }
@@ -61,7 +62,7 @@ int BALL::getBallposition(){
 
 
 void BALL::get_resister(int n){
-    get_val = n;
+    get_val = ball_get_val.demandAve(n);
 }
 
 

@@ -89,6 +89,10 @@ void setup() {
   // delay(200);
   // MOTOR.motor_0();
   dribbler.stop();
+  delay(100);
+  dribbler.run();
+  delay(200);
+  dribbler.stop();
   Switch();
 }
 
@@ -166,9 +170,9 @@ void loop() {
 
     go_ang = go_ang.degree * (ball.ang < 0 ? -1 : 1);
 
-    if(180 < ball.far){
-      go_ang = ball.ang;
-    }
+    // if(180 < ball.far){
+    //   go_ang = ball.ang;
+    // }
   }
 
 
@@ -275,7 +279,7 @@ void loop() {
   }
 
   if(M_flag == 1){
-    MOTOR.moveMotor_0(go_ang,max_val,AC_val,0);
+    // MOTOR.moveMotor_0(go_ang,max_val,AC_val,0);
   }
   else if(M_flag == 0){
     MOTOR.motor_0();
@@ -283,10 +287,14 @@ void loop() {
 
 
   if(print_flag == 1){
+    Serial.print(" | A : ");
+    Serial.print(A);
     Serial.print(" | ");
     Serial.print(go_ang.degree);
     Serial.print(" | ");
     ball.print();
+    Serial.print(" | dribller_flag : ");
+    Serial.print(dribbler_flag);
     // Serial.print(" | ");
     // line.print();
     // Serial.print(" | ");
@@ -303,6 +311,7 @@ void loop() {
   }
 
   if(toogle_f != digitalRead(toogle_P)){
+    dribbler.stop();
     MOTOR.motor_0();
     Switch();
   }
@@ -375,10 +384,10 @@ void serialEvent4(){
     }
   }
 
-  for(int i = 0; i < 6; i++){
-    Serial.print(" ");
-    Serial.print(reBuf[i]);
-  }
+  // for(int i = 0; i < 6; i++){
+  //   Serial.print(" ");
+  //   Serial.print(reBuf[i]);
+  // }
 }
 
 
