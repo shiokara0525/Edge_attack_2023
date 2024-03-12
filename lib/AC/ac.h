@@ -38,11 +38,11 @@ private:
   double dir_old = 0;
   double c_ang_old = 0;
 
-  const float kp = 8.0;  //比例制御の係数
-  const float kd = 7.0; //微分制御の係数
+  const float kp = 3.0;  //比例制御の係数
+  const float kd = 2.0; //微分制御の係数
 
   const float kp_c = 2.0;
-  const float kd_c = 1.5;
+  const float kd_c = 1.0;
   const float time = 100 / 3;
 
 

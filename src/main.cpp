@@ -22,8 +22,8 @@ timer L_;
 int A = 0;
 int B = 999;
 const int ang_180 = 210;
-const int ang_90 = 180;
-const int ang_30 = 90;
+const int ang_90 = 160;
+const int ang_30 = 82;
 const int ang_10 = 10;
 const int far_th = 130;
 int go_val = 210;
@@ -119,12 +119,13 @@ void loop() {
     }
     else{
       if(ball.flag == 1){
-        if(1 <= ball.ball_get){
-          A = 11;
-        }
-        else{
-          A = 10;
-        }
+        // if(1 <= ball.ball_get){
+        //   A = 11;
+        // }
+        // else{
+        //   A = 10;
+        // }
+        A = 10;
       }
       else{
         A = 5;
@@ -192,8 +193,6 @@ void loop() {
         kick_ = 1;
         Timer.reset();
       }
-      go_ang = 0;
-      AC_flag = 1;
     }
     // else if(cam_front.on == 1){
     //   go_ang = cam_front.ang * 3;
@@ -201,7 +200,8 @@ void loop() {
     // else{
     //   go_ang = 180;
     // }
-
+    go_ang = 0;
+    AC_flag = 1;
     dribbler_flag = 1;
   }
 
@@ -239,13 +239,12 @@ void loop() {
 
 
   ac.dir_target = target;
-  // if(AC_flag == 0){
-  //   AC_val = ac.getAC_val() * 2;
-  // }
-  // else if(AC_flag == 1){
-  //   AC_val = ac.getCam_val(-cam_front.ang) * 2;
-  // }
-  AC_val = ac.getCam_val(cam_front.ang);
+  if(AC_flag == 0){
+    AC_val = ac.getAC_val() * 2;
+  }
+  else if(AC_flag == 1){
+    AC_val = ac.getCam_val(cam_front.ang) * 2;
+  }
 
   if(kick_ == 1){
     if(Kick_F == 0){
@@ -272,46 +271,44 @@ void loop() {
     }
   }
 
-  // if(dribbler_flag == 1){
-  //   dribbler.run();
-  // }
-  // else{
-  //   dribbler.stop();
-  // }
+  if(dribbler_flag == 1){
+    // dribbler.run();
+  }
+  else{
+    // dribbler.stop();
+  }
 
   if(back_flag == 1){
     max_val = go_val_back;
   }
 
-  // if(M_flag == 1){
-  //   MOTOR.moveMotor_0(go_ang,max_val,AC_val,0);
-  // }
-  // else if(M_flag == 0){
-  //   MOTOR.motor_0();
-  // }
-  go_ang = 0;
-
-  MOTOR.moveMotor_0(go_ang,210,AC_val,0);
+  if(M_flag == 1){
+    MOTOR.moveMotor_0(go_ang,max_val,AC_val,0);
+  }
+  else if(M_flag == 0){
+    MOTOR.motor_0();
+  }
 
 
   if(print_flag == 1){
     Serial.print(" | A : ");
     Serial.print(A);
-    Serial.print(" | AC_val : ");
-    Serial.print(AC_val);
-    // Serial.print(go_ang.degree);
+    // Serial.print(" | AC_val : ");
+    // Serial.print(AC_val);
+    Serial.print(" | goang : ");
+    Serial.print(go_ang.degree);
     // Serial.print(" | ");
     // ball.print();
     // Serial.print(" | dribller_flag : ");
     // Serial.print(dribbler_flag);
-    // Serial.print(" | ");
-    // line.print();
+    Serial.print(" | ");
+    line.print();
     // Serial.print(" | ");
     // line.print_2();
     // Serial.print(" | ");
     // ac.print();
-    Serial.print(" | ");
-    cam_front.print();
+    // Serial.print(" | ");
+    // cam_front.print();
     // Serial.print(" | ");
     // Serial.print(L_time);
     // Serial.print(" | ");
