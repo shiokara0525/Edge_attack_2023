@@ -102,15 +102,22 @@ void loop() {
   Main.reset();
   ball.getBallposition();
   cam_front.getCamdata();
-  float AC_val = 100;
-  angle go_ang(ball.ang,true);
-  int max_val = go_val;
-  int line_flag = line.getLINE_Vec();
-  int AC_flag = 0; //0だったら絶対的な角度とる 1だったらゴール向く
-  int kick_ = 0; //0だったらキックしない 1だったらキック
-  int M_flag = 1; //1だったら動き続ける 0だったら止まる
-  float target = Target_dir;
-  int dribbler_flag = 0;
+  int line_flag = line.getLINE_Vec();  //ラインセンサの入力
+  angle go_ang(ball.ang,true);         //進む角度のオブジェクト
+
+  float AC_val = 100;                  //姿勢制御の出力
+  int max_val = go_val;                //進む出力
+  float target = Target_dir;           //目標角度
+
+
+  int AC_flag = 0;                     //0だったら絶対的な角度とる 1だったらゴール向く
+  int kick_ = 0;                       //0だったらキックしない 1だったらキック
+  int M_flag = 1;                      //1だったら動き続ける 0だったら止まる
+  int dribbler_flag = 0;               //ドリブラーのオンオフ
+
+
+  //----------------------------------------------------------データの処理----------------------------------------------------------//
+
   c = 0;
 
   if(line_flag == 0){
@@ -177,12 +184,17 @@ void loop() {
   }
 
 
-  if(A == 5){
+  //----------------------------------------------------------動きの決定----------------------------------------------------------//
+
+
+  if(A == 5){  //ボールがない時止まる
     if(A != B){
       B = A;
     }
     M_flag = 0;
   }
+
+
 
   if(A == 10){  //回り込むやつ
     if(A != B){
@@ -212,7 +224,7 @@ void loop() {
       go_ang = ((ang_180_ - ang_90) / 90.0 * (abs(ball.ang) - 90) + ang_90_);
     }
 
-    go_ang = go_ang.degree * (ball.ang < 0 ? -1 : 1);
+    go_ang = go_ang.degree * (ball.ang < 0 ? -1 : 1);  //角度の正負を元に戻す
 
     // if(180 < ball.far){
     //   go_ang = ball.ang;
@@ -220,7 +232,8 @@ void loop() {
   }
 
 
-  if(A == 11){
+
+  if(A == 11){  //ボール持ってるとき前進するやつ
     if(A != B){
       B = A;
       Timer.reset();
@@ -249,6 +262,8 @@ void loop() {
     dribbler_flag = 1;
   }
 
+
+
   if(A == 20){  //ラインから逃げるやつ
     angle line_ang(line.ang,true);
     if(A != B){
@@ -262,7 +277,9 @@ void loop() {
     go_ang = line.decideGoang(line_ang,Line_flag);
   }
 
-  if(A == 21){
+
+
+  if(A == 21){  //サイド読んでるとき逃げるやつ
     if(A != B){
       B = A;
       Timer.reset();
@@ -281,7 +298,9 @@ void loop() {
     }
   }
 
-  if(A == 25){
+
+
+  if(A == 25){  //後ろのライン読んだとき前に進むやつ
     if(A != B){
       B = A;
       Timer.reset();
@@ -290,7 +309,8 @@ void loop() {
   }
 
 
-  if(A == 26){
+
+  if(A == 26){  //後ろのライン読んだとき横に進むやつ
     if(A != B){
       B = A;
     }
@@ -302,6 +322,8 @@ void loop() {
     }
   }
 
+
+  //----------------------------------------------------------出力(ここで言ってるのはフラグの回収のみ)----------------------------------------------------------//
 
   ac.dir_target = target;
   if(AC_flag == 0){
@@ -428,10 +450,10 @@ void serialEvent3(){
     }
   }
 
-  for(int i = 0; i < 6; i++){
-    // Serial.print(" ");
-    // Serial.print(reBuf[i]);
-  }
+  // for(int i = 0; i < 6; i++){
+  //   Serial.print(" ");
+  //   Serial.print(reBuf[i]);
+  // }
 }
 
 
