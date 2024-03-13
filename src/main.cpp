@@ -47,7 +47,7 @@ int Neo_p = 999;
 
 Adafruit_NeoPixel pixels(DELAYVAL, PIN, NEO_GRB + NEO_KHZ800);
 //======================================================カメラ======================================================//
-int goal_color = 0;  //青が0 黄色が1
+int goal_color = 1;  //青が0 黄色が1
 Cam cam_front(4);
 Cam cam_back(3);
 //======================================================スタートスイッチ======================================================//
@@ -169,13 +169,12 @@ void loop() {
       }
       else{
         if(ball.flag == 1){
-          // if(1 <= ball.ball_get){
-          //   A = 11;
-          // }
-          // else{
-          //   A = 10;
-          // }
-          A = 10;
+          if(1 <= ball.ball_get){
+            A = 11;
+          }
+          else{
+            A = 10;
+          }
         }
         else{
           A = 5;
@@ -217,6 +216,7 @@ void loop() {
     else if(abs(ball.ang) < 30){
       go_ang = ((ang_30_ - ang_10_) / 20.0 * (abs(ball.ang) - 10) + ang_10_);
       dribbler_flag = 1;
+      max_val -= 70;
     }
     else if(abs(ball.ang) < 90){
       go_ang = ((ang_90_ - ang_30_) / 60.0 * (abs(ball.ang) - 30) + ang_30_);
@@ -389,8 +389,8 @@ void loop() {
     ball.print();
     // Serial.print(" | dribller_flag : ");
     // Serial.print(dribbler_flag);
-    Serial.print(" | ");
-    line.print();
+    // Serial.print(" | ");
+    // line.print();
     // Serial.print(" | ");
     // line.print_2();
     // Serial.print(" | ");
@@ -569,9 +569,21 @@ void serialEvent8(){
 
       x = ball.ball_x.demandAve(x);
       y = ball.ball_y.demandAve(y);
+      for(int i = 0; i < 8; i++){
+        Serial.print(" ");
+        Serial.print(revBuf_byte[i]);
+      }
+      Serial.println();
     }
     else{
-      // printf("ERR_REV");
+      printf("ERR_REV");
+      for(int i = 0; i < 8; i++){
+        Serial.print(" ");
+        Serial.print(revBuf_byte[i]);
+      }
+      Serial.println();
     }
   }
+
+
 }
