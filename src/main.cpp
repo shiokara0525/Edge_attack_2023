@@ -102,6 +102,7 @@ void loop() {
   Main.reset();
   ball.getBallposition();
   cam_front.getCamdata();
+  cam_back.getCamdata();
   int line_flag = line.getLINE_Vec();  //ラインセンサの入力
   angle go_ang(ball.ang,true);         //進む角度のオブジェクト
 
