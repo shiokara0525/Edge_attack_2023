@@ -39,7 +39,7 @@ private:
   double c_ang_old = 0;
 
   const float kp = 3.0;  //比例制御の係数
-  const float kd = 2.0; //微分制御の係数
+  const float kd = 3.0; //微分制御の係数
 
   const float kp_c = 2.0;
   const float kd_c = 1.0;
