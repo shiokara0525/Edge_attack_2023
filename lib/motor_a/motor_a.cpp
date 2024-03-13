@@ -84,10 +84,6 @@ void motor_attack::moveMotor_0(angle ang,int val,double ac_val,int flag){
   for(int i = 0; i < 4; i++){
     Mval[i] = Mval[i] / h * val;
     Moutput(i,Mval[i]);
-    Serial.print(i);
-    Serial.print(" : ");
-    Serial.print(Mval[i]);
-    Serial.print(" | ");
   }
 
 }

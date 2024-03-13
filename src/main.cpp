@@ -47,7 +47,7 @@ int Neo_p = 999;
 
 Adafruit_NeoPixel pixels(DELAYVAL, PIN, NEO_GRB + NEO_KHZ800);
 //======================================================カメラ======================================================//
-int goal_color = 1;  //青が0 黄色が1
+int goal_color = 0;  //青が0 黄色が1
 Cam cam_front(4);
 Cam cam_back(3);
 //======================================================スタートスイッチ======================================================//
@@ -116,9 +116,13 @@ void loop() {
   if(line_flag == 0){
     if(line_flag_old != line_flag){
       if(5 <= Line_flag && Line_flag <= 7){
-        if(30 < abs(ball.ang) && abs(ball.ang) < 75){
+        if(30 < abs(ball.ang) && abs(ball.ang) < 80){
           c = 1;
           A = 25;
+        }
+        else if(80 < abs(ball.ang) && abs(ball.ang) < 120){
+          c = 1;
+          A = 26;
         }
       }
     }
@@ -128,6 +132,21 @@ void loop() {
   if(A == 25){
     if(30 < abs(ball.ang) && abs(ball.ang) < 75){
       c = 1;
+    }
+    else{
+      c = 1;
+      A = 26;
+    }
+    if(line_flag == 1){
+      c = 0;
+    }
+  }
+  if(A == 26){
+    if(60 < abs(ball.ang) && abs(ball.ang) < 120){
+      c = 1;
+    }
+    if(line_flag == 1){
+      c = 0;
     }
   }
 
@@ -271,6 +290,19 @@ void loop() {
   }
 
 
+  if(A == 26){
+    if(A != B){
+      B = A;
+    }
+    if(ball.ang < 0){
+      go_ang = -90;
+    }
+    else{
+      go_ang = 90;
+    }
+  }
+
+
   ac.dir_target = target;
   if(AC_flag == 0){
     AC_val = ac.getAC_val();
@@ -330,8 +362,8 @@ void loop() {
     // Serial.print(AC_val);
     Serial.print(" | goang : ");
     Serial.print(go_ang.degree);
-    // Serial.print(" | ");
-    // ball.print();
+    Serial.print(" | ");
+    ball.print();
     // Serial.print(" | dribller_flag : ");
     // Serial.print(dribbler_flag);
     Serial.print(" | ");
