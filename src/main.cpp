@@ -21,6 +21,7 @@ timer L_;
 
 int A = 0;
 int B = 999;
+int c = 0;
 const int ang_180 = 210;
 const int ang_90 = 160;
 const int ang_30 = 82;
@@ -57,6 +58,7 @@ void Switch();
 int Target_dir;
 //======================================================ライン======================================================//
 int Line_flag = 0;
+int line_flag_old = 0;
 int Line_target_dir;
 int L_time;
 //======================================================関数たち======================================================/
@@ -109,29 +111,52 @@ void loop() {
   int M_flag = 1; //1だったら動き続ける 0だったら止まる
   float target = Target_dir;
   int dribbler_flag = 0;
+  c = 0;
 
-  if(line_flag == 1){
-    A = 20;
+  if(line_flag == 0){
+    if(line_flag_old != line_flag){
+      if(5 <= Line_flag && Line_flag <= 7){
+        if(30 < abs(ball.ang) && abs(ball.ang) < 75){
+          c = 1;
+          A = 25;
+        }
+      }
+    }
   }
-  else{
-    if(line.side_flag != 0){
-      A = 21;
+
+
+  if(A == 25){
+    if(30 < abs(ball.ang) && abs(ball.ang) < 75){
+      c = 1;
+    }
+  }
+
+
+  if(c == 0){
+    if(line_flag == 1){
+      A = 20;
     }
     else{
-      if(ball.flag == 1){
-        // if(1 <= ball.ball_get){
-        //   A = 11;
-        // }
-        // else{
-        //   A = 10;
-        // }
-        A = 10;
+      if(line.side_flag != 0){
+        A = 21;
       }
       else{
-        A = 5;
+        if(ball.flag == 1){
+          // if(1 <= ball.ball_get){
+          //   A = 11;
+          // }
+          // else{
+          //   A = 10;
+          // }
+          A = 10;
+        }
+        else{
+          A = 5;
+        }
       }
     }
   }
+
 
   if(A == 5){
     if(A != B){
@@ -214,7 +239,7 @@ void loop() {
       Timer.reset();
     }
     back_flag = 1;
-    target = Line_target_dir;
+    // target = Line_target_dir;
     go_ang = line.decideGoang(line_ang,Line_flag);
   }
 
@@ -237,13 +262,21 @@ void loop() {
     }
   }
 
+  if(A == 25){
+    if(A != B){
+      B = A;
+      Timer.reset();
+    }
+    go_ang = 0;
+  }
+
 
   ac.dir_target = target;
   if(AC_flag == 0){
-    AC_val = ac.getAC_val() * 2;
+    AC_val = ac.getAC_val();
   }
   else if(AC_flag == 1){
-    AC_val = ac.getCam_val(cam_front.ang) * 2;
+    AC_val = ac.getCam_val(cam_front.ang);
   }
 
   if(kick_ == 1){
@@ -322,6 +355,7 @@ void loop() {
     Switch();
   }
   M_time = Main.read_us();
+  line_flag_old = line_flag;
 }
 
 
