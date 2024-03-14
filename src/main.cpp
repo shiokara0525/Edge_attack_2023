@@ -72,13 +72,15 @@ void setup() {
   cam_back.begin();
   pixels.begin();
   pixels.clear();
-  // dribbler.setup();
   pinMode(LED,OUTPUT);
   pinMode(K,OUTPUT);
   pinMode(C,OUTPUT);
   digitalWrite(C,HIGH);
   digitalWrite(K,LOW);
-  // dribbler.setup();
+  dribbler.setup();
+  dribbler.run();
+  delay(200);
+  dribbler.stop();
   if(goal_color == 0){
     cam_front.color = 0;  //青が0 黄色が1
     cam_back.color = 1;  //青が0 黄色が1
@@ -87,14 +89,7 @@ void setup() {
     cam_front.color = 1;  //青が0 黄色が1
     cam_back.color = 0;  //青が0 黄色が1
   }
-  // MOTOR.motor_ac(100);
-  // delay(200);
-  // MOTOR.motor_0();
-  // dribbler.stop();
-  // delay(100);
-  // dribbler.run();
-  // delay(200);
-  // dribbler.stop();
+
   Switch();
 }
 
@@ -133,6 +128,18 @@ void loop() {
           A = 26;
         }
       }
+      if(line_flag == 11 || line_flag <= 1){
+        if(abs(ball.ang) < 10){
+          A = 12;
+        }
+      }
+    }
+  }
+
+
+  if(A == 12){
+    if(Timer.read_ms() < 400 && abs(ball.ang) < 20){
+      c = 1;
     }
   }
 
@@ -252,14 +259,25 @@ void loop() {
         Timer.reset();
       }
     }
-    // else if(cam_front.on == 1){
-    //   go_ang = cam_front.ang * 3;
-    // }
-    // else{
-    //   go_ang = 180;
-    // }
+    else if(abs(cam_front.ang) < 40){
+      go_ang = cam_front.ang * 1.5;
+    }
+    else{
+      go_ang = 180;
+    }
     go_ang = 0;
     AC_flag = 1;
+    dribbler_flag = 1;
+  }
+
+
+
+  if(A == 12){
+    if(A != B){
+      B = A;
+      Timer.reset();
+    }
+    M_flag = 0;
     dribbler_flag = 1;
   }
 
@@ -360,10 +378,10 @@ void loop() {
   }
 
   if(dribbler_flag == 1){
-    // dribbler.run();
+    dribbler.run();
   }
   else{
-    // dribbler.stop();
+    dribbler.stop();
   }
 
   if(back_flag == 1){
@@ -376,6 +394,8 @@ void loop() {
   else if(M_flag == 0){
     MOTOR.motor_0();
   }
+
+  digitalWrite(LED,cam_front.on);
 
 
   if(print_flag == 1){
@@ -395,8 +415,8 @@ void loop() {
     // line.print_2();
     // Serial.print(" | ");
     // ac.print();
-    // Serial.print(" | ");
-    // cam_front.print();
+    Serial.print(" | ");
+    cam_front.print();
     // Serial.print(" | ");
     // Serial.print(L_time);
     // Serial.print(" | ");
