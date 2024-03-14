@@ -105,9 +105,16 @@ void motor_attack::motor_0(){  //モーターの値を0にする関数
 
 
 float motor_attack::Moutput(int i,float Mval){
-  if(i <= 1){
-    Mval *= 0.55;
+  if(i == 0){
+    Mval *= 0.80;
   }
+  if(i == 1){
+    Mval *= 0.7;
+  }
+  if(i == 2){
+    Mval *= 0.85;
+  }
+
   if(Mval < -255){
     Mval = -255;
   }
