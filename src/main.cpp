@@ -7,15 +7,18 @@
 #include<MA.h>
 #include<timer.h>
 #include<Cam.h>
+#include<kicker.h>
 #include<BLDC.h>
 
 BALL ball;
 LINE line;
 AC ac;
 motor_attack MOTOR;
+Kicker kicker;
+BLDC dribbler;
+
 timer Timer;
 timer Main;
-BLDC dribbler;
 int M_time;
 timer L_;
 
@@ -34,12 +37,6 @@ int print_flag = 1;// 1だったらシリアルプリントする
 int cam_front_on = 0;
 int CFO_B = 999;
 timer CFO_t;
-//======================================================きっく======================================================//
-timer kick_time;
-int Kick_F = 0;
-const int C = 32;
-const int K = 31;
-int kick_flag = 0;
 //======================================================neopiku======================================================//
 #define DELAYVAL 500
 #define PIN        30 
@@ -75,11 +72,7 @@ void setup() {
   cam_back.begin();
   pixels.begin();
   pixels.clear();
-  pinMode(LED,OUTPUT);
-  pinMode(K,OUTPUT);
-  pinMode(C,OUTPUT);
-  digitalWrite(C,HIGH);
-  digitalWrite(K,LOW);
+  kicker.setup();
   dribbler.setup();
   dribbler.run();
   delay(200);
@@ -255,7 +248,6 @@ void loop() {
     if(A != B){
       B = A;
       Timer.reset();
-      kick_flag = 0;
       CFO_t.reset();
     }
     cam_front_on = 0;
@@ -290,11 +282,6 @@ void loop() {
     else if(cam_front_on == 0){
       CFO_B = 0;
     }
-
-    if(cam_front.on == 0){
-      go_ang = 180;
-    }
-    // AC_flag = 1;
     dribbler_flag = 1;
   }
 
@@ -380,30 +367,7 @@ void loop() {
     AC_val = ac.getCam_val(cam_front.ang);
   }
 
-  if(kick_ == 1){
-    if(Kick_F == 0){
-      Kick_F = 1;
-      kick_time.reset();
-    }
-  }
-
-  if(Kick_F == 1){
-    if(kick_time.read_ms() < 10){
-      digitalWrite(C,LOW);
-    }
-    else if(kick_time.read_ms() < 60){
-      digitalWrite(K,HIGH);
-      digitalWrite(LED,HIGH);
-    }
-    else if(kick_time.read_ms() < 70){
-      digitalWrite(K,LOW);
-      digitalWrite(LED,LOW);
-    }
-    else{
-      digitalWrite(C,HIGH);
-      Kick_F = 0;
-    }
-  }
+  kicker.run(kick_);
 
   if(dribbler_flag == 1){
     dribbler.run();
