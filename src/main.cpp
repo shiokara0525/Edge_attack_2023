@@ -260,36 +260,35 @@ void loop() {
     }
     cam_front_on = 0;
 
-    if(cam_front.on == 1 && (abs(cam_front.ang) < 15 || cam_front.senter == 1)){
-      cam_front_on = 1;
-      if(cam_front_on != CFO_B){
-        CFO_B = cam_front_on;
-        CFO_t.reset();
+    if(cam_front.on == 1){
+      if(abs(cam_front.ang) < 20){
+        cam_front_on = 1;
+        go_ang = 0;
+        AC_flag = 1;
       }
-      if(kick_flag == 0 && 300 < CFO_t.read_ms()){
-        kick_ = 1;
-        kick_flag = 1;
-        Timer.reset();
+      else if(abs(cam_front.ang) < 40){
+        go_ang = -cam_front.ang * 1.5;
+        AC_flag = 1;
       }
-      else if(kick_flag == 1 && 3000 < CFO_t.read_ms()){
-        kick_ = 1;
-        Timer.reset();
+      else{
+        go_ang = -cam_front.ang * 1.5;
       }
-      go_ang = 0;
-    }
-    else if(abs(cam_front.ang) < 60){
-      if(cam_front_on != CFO_B){
-        CFO_B = cam_front_on;
-        CFO_t.reset();
-      }
-      go_ang = -cam_front.ang * 1.7;
     }
     else{
+      go_ang = 180;
+    }
+
+    if(cam_front_on == 1){
       if(cam_front_on != CFO_B){
         CFO_B = cam_front_on;
         CFO_t.reset();
       }
-      go_ang = 0;
+      if(300 < CFO_t.read_ms()){
+        kick_ = 1;
+      }
+    }
+    else if(cam_front_on == 0){
+      CFO_B = 0;
     }
 
     if(cam_front.on == 0){
