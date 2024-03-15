@@ -24,13 +24,16 @@ int B = 999;
 int c = 0;
 const int ang_180 = 210;
 const int ang_90 = 160;
-const int ang_30 = 82;
-const int ang_10 = 10;
+const int ang_30 = 90;
+const int ang_10 = 30;
 const int far_th = 130;
 int go_val = 240;
 int go_val_back = 255;
 int back_flag = 0;
 int print_flag = 1;// 1だったらシリアルプリントする
+int cam_front_on = 0;
+int CFO_B = 999;
+timer CFO_t;
 //======================================================きっく======================================================//
 timer kick_time;
 int Kick_F = 0;
@@ -115,6 +118,12 @@ void loop() {
   //----------------------------------------------------------データの処理----------------------------------------------------------//
 
   c = 0;
+
+  if(cam_front_on == 1){
+  }
+  else{
+    CFO_B = 0;
+  }
 
   if(line_flag == 0){
     if(line_flag_old != line_flag){
@@ -217,12 +226,13 @@ void loop() {
     }
 
     if(abs(ball.ang) < 10){
-      go_ang = ang_10_ / 10.0 * ball.ang;
+      // go_ang = ang_10_ / 10.0 * ball.ang;
+      go_ang = ball.ang;
       dribbler_flag = 1;
     }
     else if(abs(ball.ang) < 30){
       go_ang = ((ang_30_ - ang_10_) / 20.0 * (abs(ball.ang) - 10) + ang_10_);
-      dribbler_flag = 1;
+      // dribbler_flag = 1;
       max_val -= 70;
     }
     else if(abs(ball.ang) < 90){
@@ -246,27 +256,46 @@ void loop() {
       B = A;
       Timer.reset();
       kick_flag = 0;
+      CFO_t.reset();
     }
+    cam_front_on = 0;
 
-    if(abs(cam_front.ang) < 10 || cam_front.senter == 1){
-      if(kick_flag == 0 && 200 < Timer.read_ms()){
+    if(cam_front.on == 1 && (abs(cam_front.ang) < 15 || cam_front.senter == 1)){
+      cam_front_on = 1;
+      if(cam_front_on != CFO_B){
+        CFO_B = cam_front_on;
+        CFO_t.reset();
+      }
+      if(kick_flag == 0 && 300 < CFO_t.read_ms()){
         kick_ = 1;
         kick_flag = 1;
         Timer.reset();
       }
-      else if(kick_flag == 1 && 300 < Timer.read_ms()){
+      else if(kick_flag == 1 && 3000 < CFO_t.read_ms()){
         kick_ = 1;
         Timer.reset();
       }
+      go_ang = 0;
     }
-    else if(abs(cam_front.ang) < 40){
-      go_ang = cam_front.ang * 1.5;
+    else if(abs(cam_front.ang) < 60){
+      if(cam_front_on != CFO_B){
+        CFO_B = cam_front_on;
+        CFO_t.reset();
+      }
+      go_ang = -cam_front.ang * 1.7;
     }
     else{
+      if(cam_front_on != CFO_B){
+        CFO_B = cam_front_on;
+        CFO_t.reset();
+      }
+      go_ang = 0;
+    }
+
+    if(cam_front.on == 0){
       go_ang = 180;
     }
-    go_ang = 0;
-    AC_flag = 1;
+    // AC_flag = 1;
     dribbler_flag = 1;
   }
 
@@ -395,7 +424,7 @@ void loop() {
     MOTOR.motor_0();
   }
 
-  digitalWrite(LED,cam_front.on);
+  digitalWrite(LED,cam_front_on);
 
 
   if(print_flag == 1){
@@ -407,6 +436,8 @@ void loop() {
     Serial.print(go_ang.degree);
     Serial.print(" | ");
     ball.print();
+    Serial.print(" | CFO : ");
+    Serial.print(CFO_t.read_ms());
     // Serial.print(" | dribller_flag : ");
     // Serial.print(dribbler_flag);
     // Serial.print(" | ");
