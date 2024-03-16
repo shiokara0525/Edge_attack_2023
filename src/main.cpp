@@ -252,12 +252,14 @@ void loop() {
       CFO_t.reset();
     }
     cam_front_on = 0;
+    dribbler_flag = 1;
 
     if(cam_front.on == 1){
-      if(abs(cam_front.ang) < 20){
+      if(abs(cam_front.ang) < 30){
         cam_front_on = 1;
         go_ang = 0;
         AC_flag = 1;
+        dribbler_flag = 0;
       }
       else if(abs(cam_front.ang) < 40){
         go_ang = -cam_front.ang * 1.0;
@@ -286,7 +288,6 @@ void loop() {
     else if(cam_front_on == 0){
       CFO_B = 0;
     }
-    dribbler_flag = 1;
   }
 
 
