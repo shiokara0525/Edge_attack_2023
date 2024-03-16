@@ -254,7 +254,7 @@ void loop() {
     cam_front_on = 0;
 
     if(cam_front.on == 1){
-      if(abs(cam_front.ang) < 15){
+      if(abs(cam_front.ang) < 20){
         cam_front_on = 1;
         go_ang = 0;
         AC_flag = 1;

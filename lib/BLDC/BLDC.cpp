@@ -6,11 +6,11 @@ void BLDC::setup(){
   Serial.println("Writing maximum output.");
   esc.writeMicroseconds(MAX_SIGNAL);  //ESCへ最大のパルス幅を指示します
   Serial.println("Wait 2 seconds.");
-  delay(2000);
+  delay(500);
   Serial.println("Writing minimum output");
   esc.writeMicroseconds(MIN_SIGNAL);  //ESCへ最小のパルス幅を指示します
   Serial.println("Wait 2 seconds. Then motor starts");
-  delay(2000);
+  delay(500);
 }
 
 
