@@ -9,7 +9,7 @@ class Kicker{
         void setup();
         int run(int);
         int stop();
-        int kick_flag;
+        int kick_flag = 0;
 
     private:
         timer kick_time;

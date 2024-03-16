@@ -65,6 +65,7 @@ int L_time;
 
 void setup() {
   Serial.begin(9600);
+  pinMode(LED,OUTPUT);
   ball.begin();
   line.begin();
   ac.setup();
@@ -253,17 +254,17 @@ void loop() {
     cam_front_on = 0;
 
     if(cam_front.on == 1){
-      if(abs(cam_front.ang) < 20){
+      if(abs(cam_front.ang) < 15){
         cam_front_on = 1;
         go_ang = 0;
         AC_flag = 1;
       }
       else if(abs(cam_front.ang) < 40){
-        go_ang = -cam_front.ang * 1.5;
+        go_ang = -cam_front.ang * 1.0;
         AC_flag = 1;
       }
       else{
-        go_ang = -cam_front.ang * 1.5;
+        go_ang = -cam_front.ang * 1.0;
       }
     }
     else{
@@ -275,7 +276,10 @@ void loop() {
         CFO_B = cam_front_on;
         CFO_t.reset();
       }
-      if(300 < CFO_t.read_ms()){
+      if(250 < CFO_t.read_ms()){
+        kick_ = 1;
+      }
+      if(70 < cam_front.Size){
         kick_ = 1;
       }
     }
@@ -364,7 +368,7 @@ void loop() {
     AC_val = ac.getAC_val();
   }
   else if(AC_flag == 1){
-    AC_val = ac.getCam_val(cam_front.ang);
+    AC_val = ac.getCam_val(cam_front.ang) * 1.5;
   }
 
   kicker.run(kick_);
@@ -397,8 +401,8 @@ void loop() {
     // Serial.print(AC_val);
     Serial.print(" | goang : ");
     Serial.print(go_ang.degree);
-    Serial.print(" | ");
-    ball.print();
+    // Serial.print(" | ");
+    // ball.print();
     Serial.print(" | CFO : ");
     Serial.print(CFO_t.read_ms());
     // Serial.print(" | dribller_flag : ");
@@ -411,6 +415,8 @@ void loop() {
     // ac.print();
     Serial.print(" | ");
     cam_front.print();
+    Serial.print(" | ac : ");
+    Serial.print(AC_val);
     // Serial.print(" | ");
     // Serial.print(L_time);
     // Serial.print(" | ");

@@ -4,7 +4,7 @@
 #define MAX_SIGNAL 2000  //PWM信号における最大のパルス幅[マイクロ秒]
 #define MIN_SIGNAL 1000  //PWM信号における最小のパルス幅[マイクロ秒]
 #define ESC_PIN 33  //ESCへの出力ピン
-#define SIGNAL 1800
+#define SIGNAL 1500
 
 class BLDC{
     public:
