@@ -27,7 +27,7 @@ int B = 999;
 int c = 0;
 const int ang_180 = 210;
 const int ang_90 = 160;
-const int ang_30 = 90;
+const int ang_30 = 75;
 const int ang_10 = 30;
 const int far_th = 130;
 int go_val = 240;
@@ -122,11 +122,11 @@ void loop() {
   if(line_flag == 0){
     if(line_flag_old != line_flag){
       if(5 <= Line_flag && Line_flag <= 7){
-        if(30 < abs(ball.ang) && abs(ball.ang) < 80){
+        if(30 < abs(ball.ang) && abs(ball.ang) <= 85){
           c = 1;
           A = 25;
         }
-        else if(80 < abs(ball.ang) && abs(ball.ang) < 120){
+        else if(85 < abs(ball.ang) && abs(ball.ang) < 120){
           c = 1;
           A = 26;
         }
@@ -221,7 +221,7 @@ void loop() {
 
     if(abs(ball.ang) < 10){
       // go_ang = ang_10_ / 10.0 * ball.ang;
-      go_ang = ball.ang;
+      go_ang = 0;
       dribbler_flag = 1;
     }
     else if(abs(ball.ang) < 30){
@@ -259,7 +259,7 @@ void loop() {
         cam_front_on = 1;
         go_ang = 0;
         AC_flag = 1;
-        dribbler_flag = 0;
+        // dribbler_flag = 0;
       }
       else if(abs(cam_front.ang) < 40){
         go_ang = -cam_front.ang * 1.0;
@@ -277,6 +277,9 @@ void loop() {
       if(cam_front_on != CFO_B){
         CFO_B = cam_front_on;
         CFO_t.reset();
+      }
+      if(150 < CFO_t.read_ms()){
+        dribbler_flag = 0;
       }
       if(250 < CFO_t.read_ms()){
         kick_ = 1;
@@ -408,8 +411,8 @@ void loop() {
     Serial.print(CFO_t.read_ms());
     // Serial.print(" | dribller_flag : ");
     // Serial.print(dribbler_flag);
-    // Serial.print(" | ");
-    // line.print();
+    Serial.print(" | ");
+    line.print();
     // Serial.print(" | ");
     // line.print_2();
     // Serial.print(" | ");
