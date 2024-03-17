@@ -26,9 +26,9 @@ int A = 0;
 int B = 999;
 int c = 0;
 const int ang_180 = 210;
-const int ang_90 = 160;
-const int ang_30 = 75;
-const int ang_10 = 30;
+const int ang_90 = 170;
+const int ang_45 = 105;
+const int ang_10 = 40;
 const int far_th = 130;
 int go_val = 240;
 int go_val_back = 255;
@@ -135,6 +135,9 @@ void loop() {
         if(abs(ball.ang) < 10){
           A = 12;
         }
+        else if(abs(ball.ang) < 45 && cam_front.on == 0){
+          A = 27;
+        }
       }
     }
   }
@@ -165,6 +168,12 @@ void loop() {
     }
     if(line_flag == 1){
       c = 0;
+    }
+  }
+
+  if(A == 27){
+    if(Timer.read_ms() < 500 && abs(ball.ang) < 45){
+      c = 1;
     }
   }
 
@@ -213,7 +222,7 @@ void loop() {
     }
     int ang_180_ = ang_180;
     int ang_90_ = ang_90;
-    int ang_30_ = ang_30;
+    int ang_45_ = ang_45;
     int ang_10_ = ang_10;
     if(70 < abs(ac.dir)){
       // ball.ang -= ac.dir;
@@ -224,13 +233,13 @@ void loop() {
       go_ang = 0;
       dribbler_flag = 1;
     }
-    else if(abs(ball.ang) < 30){
-      go_ang = ((ang_30_ - ang_10_) / 20.0 * (abs(ball.ang) - 10) + ang_10_);
+    else if(abs(ball.ang) < 45){
+      go_ang = ((ang_45_ - ang_10_) / 35.0 * (abs(ball.ang) - 10) + ang_10_);
       // dribbler_flag = 1;
       max_val -= 70;
     }
     else if(abs(ball.ang) < 90){
-      go_ang = ((ang_90_ - ang_30_) / 60.0 * (abs(ball.ang) - 30) + ang_30_);
+      go_ang = ((ang_90_ - ang_45_) / 45.0 * (abs(ball.ang) - 45) + ang_45_);
     }
     else{
       go_ang = ((ang_180_ - ang_90) / 90.0 * (abs(ball.ang) - 90) + ang_90_);
@@ -238,9 +247,10 @@ void loop() {
 
     go_ang = go_ang.degree * (ball.ang < 0 ? -1 : 1);  //角度の正負を元に戻す
 
-    // if(180 < ball.far){
-    //   go_ang = ball.ang;
-    // }
+    if(abs(ball.ang) < 20){
+      max_val -= 70;
+      dribbler_flag = 1;
+    }
   }
 
 
@@ -262,11 +272,11 @@ void loop() {
         // dribbler_flag = 0;
       }
       else if(abs(cam_front.ang) < 40){
-        go_ang = -cam_front.ang * 1.0;
+        go_ang = -cam_front.ang * 1.5;
         AC_flag = 1;
       }
       else{
-        go_ang = -cam_front.ang * 1.0;
+        go_ang = -cam_front.ang * 1.5;
       }
     }
     else{
@@ -361,6 +371,21 @@ void loop() {
     }
     else{
       go_ang = 90;
+    }
+  }
+
+
+
+  if(A == 27){
+    if(A != B){
+      B = A;
+      Timer.reset();
+    }
+    if(Timer.read_ms() < 100){
+      go_ang = 180;
+    }
+    else{
+      M_flag = 0;
     }
   }
 

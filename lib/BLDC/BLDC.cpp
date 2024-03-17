@@ -3,6 +3,7 @@
 
 void BLDC::setup(){
   esc.attach(ESC_PIN);  //ESCへの出力ピンをアタッチします
+  delay(300);
   Serial.println("Writing maximum output.");
   esc.writeMicroseconds(MAX_SIGNAL);  //ESCへ最大のパルス幅を指示します
   Serial.println("Wait 2 seconds.");
