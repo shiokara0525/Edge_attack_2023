@@ -224,9 +224,6 @@ void loop() {
     int ang_90_ = ang_90;
     int ang_45_ = ang_45;
     int ang_10_ = ang_10;
-    if(70 < abs(ac.dir)){
-      // ball.ang -= ac.dir;
-    }
 
     if(abs(ball.ang) < 10){
       // go_ang = ang_10_ / 10.0 * ball.ang;
@@ -234,6 +231,9 @@ void loop() {
       dribbler_flag = 1;
     }
     else if(abs(ball.ang) < 45){
+      if(ball.far < 178){
+        ang_10_ = 90;
+      }
       go_ang = ((ang_45_ - ang_10_) / 35.0 * (abs(ball.ang) - 10) + ang_10_);
       // dribbler_flag = 1;
       max_val -= 70;
@@ -265,7 +265,7 @@ void loop() {
     dribbler_flag = 1;
 
     if(cam_front.on == 1){
-      if(abs(cam_front.ang) < 30){
+      if(abs(cam_front.ang) < 30 && 30 < cam_front.Size){
         cam_front_on = 1;
         go_ang = 0;
         AC_flag = 1;
@@ -430,22 +430,22 @@ void loop() {
     // Serial.print(AC_val);
     Serial.print(" | goang : ");
     Serial.print(go_ang.degree);
-    // Serial.print(" | ");
-    // ball.print();
+    Serial.print(" | ");
+    ball.print();
     Serial.print(" | CFO : ");
     Serial.print(CFO_t.read_ms());
     // Serial.print(" | dribller_flag : ");
     // Serial.print(dribbler_flag);
-    Serial.print(" | ");
-    line.print();
+    // Serial.print(" | ");
+    // line.print();
     // Serial.print(" | ");
     // line.print_2();
     // Serial.print(" | ");
     // ac.print();
     Serial.print(" | ");
     cam_front.print();
-    Serial.print(" | ac : ");
-    Serial.print(AC_val);
+    // Serial.print(" | ac : ");
+    // Serial.print(AC_val);
     // Serial.print(" | ");
     // Serial.print(L_time);
     // Serial.print(" | ");
