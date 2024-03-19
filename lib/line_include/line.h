@@ -27,6 +27,7 @@ public:
     uint8_t data_byte[4];
     double ele_X[27]; //ラインセンサのX座標
     double ele_Y[27]; //ラインセンサのY座標
+    int LINE_Level;
  
     int LINE_on; //ラインがロボットの下になかったら0,あったら1にする
     int line_flag = 0;

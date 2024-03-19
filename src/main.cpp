@@ -9,7 +9,9 @@
 #include<Cam.h>
 #include<kicker.h>
 #include<BLDC.h>
+#include<OLED_a.h>
 
+oled_attack OLED;
 BALL ball;
 LINE line;
 AC ac;
@@ -36,6 +38,11 @@ int back_flag = 0;
 int print_flag = 1;// 1だったらシリアルプリントする
 int cam_front_on = 0;
 int CFO_B = 999;
+void OLED_moving();
+
+const int Tact_Switch[3] = {38,37,36};
+int ac_val;
+
 timer CFO_t;
 //======================================================neopiku======================================================//
 #define DELAYVAL 500
@@ -54,7 +61,6 @@ Cam cam_back(3);
 int LED = 13;
 int toogle_f;
 int toogle_P = 27;
-void Switch();
 int Target_dir;
 //======================================================ライン======================================================//
 int Line_flag = 0;
@@ -86,8 +92,9 @@ void setup() {
     cam_front.color = 1;  //青が0 黄色が1
     cam_back.color = 0;  //青が0 黄色が1
   }
-
-  Switch();
+  OLED.setup();
+  OLED.OLED();
+  Target_dir = ac.dir_n;
 }
 
 void loop() {
@@ -444,8 +451,8 @@ void loop() {
     // ac.print();
     Serial.print(" | ");
     cam_front.print();
-    // Serial.print(" | ac : ");
-    // Serial.print(AC_val);
+    Serial.print(" | ac : ");
+    Serial.print(AC_val);
     // Serial.print(" | ");
     // Serial.print(L_time);
     // Serial.print(" | ");
@@ -453,29 +460,73 @@ void loop() {
     Serial.println();
   }
 
-  if(toogle_f != digitalRead(toogle_P)){
+  if(digitalReadFast(Tact_Switch[1]) == LOW){
     dribbler.stop();
     MOTOR.motor_0();
-    Switch();
+    OLED.OLED();
+    max_val = OLED.val_max;
+    Target_dir = ac.dir_n;
   }
+
+  if(MOTOR.NoneM_flag == 1){
+    OLED_moving();
+  }
+  ac_val = AC_val;
   M_time = Main.read_us();
   line_flag_old = line_flag;
 }
 
 
+void OLED_moving(){
+  //OLEDの初期化
+  OLED.display.display();
+  OLED.display.clearDisplay();
 
-void Switch(){
-  digitalWrite(LED,HIGH);
-  toogle_f = digitalRead(toogle_P);
-  delay(100);
-  while(digitalRead(toogle_P) == toogle_f);
-  digitalWrite(LED,LOW);
-  ac.setup_2();
-  Target_dir = ac.dir_n;
-  toogle_f = digitalRead(toogle_P);
-  delay(100);
-  while(digitalRead(toogle_P) == toogle_f);
-  toogle_f = digitalRead(toogle_P);
+  //テキストサイズと色の設定
+  OLED.display.setTextSize(1);
+  OLED.display.setTextColor(WHITE);
+  
+  OLED.display.setCursor(0,0);  //1列目
+  OLED.display.println("ang");  //現在向いてる角度
+  OLED.display.setCursor(30,0);
+  OLED.display.println(":");
+  OLED.display.setCursor(36,0);
+  OLED.display.println(ac.dir);    //現在向いてる角度を表示
+
+  OLED.display.setCursor(0,10);  //2列目
+  OLED.display.println("ACval");  //この中に変数名を入力
+  OLED.display.setCursor(30,10);
+  OLED.display.println(":");
+  OLED.display.setCursor(36,10);
+  OLED.display.println(ac_val);    //この中に知りたい変数を入力a
+
+  OLED.display.setCursor(0,20); //3列目
+  OLED.display.println("CA");  //この中に変数名を入力
+  OLED.display.setCursor(30,20);
+  OLED.display.println(":");
+  OLED.display.setCursor(36,20);
+  OLED.display.println();    //この中に知りたい変数を入力
+
+  OLED.display.setCursor(0,30); //4列目
+  OLED.display.println("L_f");  //この中に変数名を入力
+  OLED.display.setCursor(30,30);
+  OLED.display.println(":");
+  OLED.display.setCursor(36,30);
+  OLED.display.println();    //この中に知りたい変数を入力
+
+  OLED.display.setCursor(0,40); //5列目
+  OLED.display.println("");  //この中に変数名を入力
+  OLED.display.setCursor(30,40);
+  OLED.display.println(":");
+  OLED.display.setCursor(36,40);
+  OLED.display.println();    //この中に知りたい変数を入力
+
+  OLED.display.setCursor(0,50); //6列目
+  OLED.display.println("");  //この中に変数名を入力
+  OLED.display.setCursor(30,50);
+  OLED.display.println(":");
+  OLED.display.setCursor(36,50);
+  OLED.display.println();    //この中に知りたい変数を入力
 }
 
 

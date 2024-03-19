@@ -10,7 +10,9 @@ motor_attack::motor_attack(){
   for(int i = 0; i < 4; i++){
     Motor[i].setLenth(motor_max);
   }
-  analogWriteFrequency(3,90000);
+  for(int i = 0; i < 10; i++){
+    analogWriteFrequency(i,90000);
+  }
     //モーターのピンと行列式に使う定数の設定
 }
 
@@ -105,6 +107,9 @@ void motor_attack::motor_0(){  //モーターの値を0にする関数
 
 
 float motor_attack::Moutput(int i,float Mval){
+  if(NoneM_flag == 1){
+    Mval = 0;
+  }
   if(i == 0){
     Mval *= 0.80;
   }
