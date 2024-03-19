@@ -27,8 +27,6 @@ class BALL{
         void begin();
         void get_resister_1(int);
         void get_resister_2(int);
-
-    private:
         int get_1;
         int get_2;
 };

@@ -272,7 +272,7 @@ void loop() {
     dribbler_flag = 1;
 
     if(cam_front.on == 1){
-      if(abs(cam_front.ang) < 30 && 30 < cam_front.Size){
+      if(abs(cam_front.ang) < 30){
         cam_front_on = 1;
         go_ang = 0;
         AC_flag = 1;
@@ -494,39 +494,39 @@ void OLED_moving(){
   OLED.display.println(ac.dir);    //現在向いてる角度を表示
 
   OLED.display.setCursor(0,10);  //2列目
-  OLED.display.println("ACval");  //この中に変数名を入力
+  OLED.display.println("C_A");  //この中に変数名を入力
   OLED.display.setCursor(30,10);
   OLED.display.println(":");
   OLED.display.setCursor(36,10);
-  OLED.display.println(ac_val);    //この中に知りたい変数を入力a
+  OLED.display.println(cam_front.ang);    //この中に知りたい変数を入力a
 
-  OLED.display.setCursor(0,20); //3列目
-  OLED.display.println("CA");  //この中に変数名を入力
+  OLED.display.setCursor(0,20); //3列目 
+  OLED.display.println("CFO");  //この中に変数名を入力
   OLED.display.setCursor(30,20);
   OLED.display.println(":");
   OLED.display.setCursor(36,20);
-  OLED.display.println();    //この中に知りたい変数を入力
+  OLED.display.println(cam_front_on);    //この中に知りたい変数を入力
 
   OLED.display.setCursor(0,30); //4列目
-  OLED.display.println("L_f");  //この中に変数名を入力
+  OLED.display.println("get");  //この中に変数名を入力
   OLED.display.setCursor(30,30);
   OLED.display.println(":");
   OLED.display.setCursor(36,30);
-  OLED.display.println();    //この中に知りたい変数を入力
+  OLED.display.println(ball.ball_get);    //この中に知りたい変数を入力
 
   OLED.display.setCursor(0,40); //5列目
-  OLED.display.println("");  //この中に変数名を入力
+  OLED.display.println("1");  //この中に変数名を入力
   OLED.display.setCursor(30,40);
   OLED.display.println(":");
   OLED.display.setCursor(36,40);
-  OLED.display.println();    //この中に知りたい変数を入力
+  OLED.display.println(ball.get_1);    //この中に知りたい変数を入力
 
   OLED.display.setCursor(0,50); //6列目
-  OLED.display.println("");  //この中に変数名を入力
+  OLED.display.println("2");  //この中に変数名を入力
   OLED.display.setCursor(30,50);
   OLED.display.println(":");
   OLED.display.setCursor(36,50);
-  OLED.display.println();    //この中に知りたい変数を入力
+  OLED.display.println(ball.get_2);    //この中に知りたい変数を入力
 }
 
 
