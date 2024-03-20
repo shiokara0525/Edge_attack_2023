@@ -42,9 +42,10 @@ int Kicker::run(int kick_){
 
 
 int Kicker::stop(){
-    digitalWrite(K,LOW);
-    digitalWrite(C,HIGH);
-    kick_flag = 0;
-    kick_time.reset();
-    return kick_flag;
+  while(kick_time.read_ms() < 5000);
+  digitalWrite(K,LOW);
+  digitalWrite(C,HIGH);
+  kick_flag = 0;
+  kick_time.reset();
+  return kick_flag;
 }
