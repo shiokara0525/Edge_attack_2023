@@ -36,12 +36,14 @@ int Kicker::run(int kick_){
       kick_flag = 0;
     }
   }
-    return kick_flag;
+  return kick_flag;
 }
 
 
 
 int Kicker::stop(){
+  digitalWrite(C,LOW);
+  digitalWrite(K,LOW);
   while(kick_time.read_ms() < 5000);
   digitalWrite(K,LOW);
   digitalWrite(C,HIGH);

@@ -12,6 +12,7 @@
 #include<Cam.h>
 #include<motor_a.h>
 #include<Arduino.h>
+#include<kicker.h>
 
 extern AC ac;
 extern Cam cam_front;
@@ -19,6 +20,7 @@ extern Cam cam_back;
 extern BALL ball;
 extern LINE line;
 extern motor_attack MOTOR;
+extern Kicker kicker;
 
 /*------------------------------------------------------------------------------------------------------------*/
 

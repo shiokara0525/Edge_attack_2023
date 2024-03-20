@@ -279,11 +279,11 @@ void loop() {
         // dribbler_flag = 0;
       }
       else if(abs(cam_front.ang) < 40){
-        go_ang = -cam_front.ang * 1.5;
+        go_ang = cam_front.ang * 1.5;
         AC_flag = 1;
       }
       else{
-        go_ang = -cam_front.ang * 1.5;
+        go_ang = cam_front.ang * 1.5;
       }
     }
     else{
@@ -404,7 +404,7 @@ void loop() {
     AC_val = ac.getAC_val();
   }
   else if(AC_flag == 1){
-    AC_val = ac.getCam_val(cam_front.ang) * 1.5;
+    AC_val = ac.getCam_val(cam_front.ang);
   }
 
   kicker.run(kick_);

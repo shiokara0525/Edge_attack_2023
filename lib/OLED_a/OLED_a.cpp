@@ -414,7 +414,7 @@ void oled_attack::OLED() {
         display.setTextSize(1);
         display.setTextColor(WHITE);
         display.setCursor(85,35);
-        display.println("Start");
+        display.println("Kick");
         display.setCursor(88,45);
         display.println("");
 
@@ -426,6 +426,39 @@ void oled_attack::OLED() {
         }else{
           if(digitalRead(Tact_Switch[1]) == HIGH){  //タクトスイッチが手から離れたら
             A_OLED = 80;  //その選択されているステートにレッツゴー
+            aa = 0;
+          }
+        }
+      }
+      else if(OLED_select == 10){
+        display.setTextSize(2);
+        if(flash_OLED == 0){  //白黒反転　何秒かの周期で白黒が変化するようにタイマーを使っている（flash_OLEDについて調べたらわかる）
+          display.setTextColor(BLACK, WHITE);
+        }
+        else{
+          display.setTextColor(WHITE);
+        }
+        display.setCursor(0,35);
+        display.println("Kick");
+
+        //選択画面で矢印マークを中央に表示
+        display.fillTriangle(70, 43, 64, 37, 64, 49, WHITE);  //▶の描画
+
+        display.setTextSize(1);
+        display.setTextColor(WHITE);
+        display.setCursor(85,35);
+        display.println("Start");
+        display.setCursor(88,45);
+        display.println("");
+
+        //タクトスイッチが押されたら(手を離されるまで次のステートに行かせたくないため、変数aaを使っている)
+        if(aa == 0){
+          if(digitalRead(Tact_Switch[1]) == LOW){  //タクトスイッチが押されたら
+            aa = 1;
+          }
+        }else{
+          if(digitalRead(Tact_Switch[1]) == HIGH){  //タクトスイッチが手から離れたら
+            A_OLED = 100;  //その選択されているステートにレッツゴー
             aa = 0;
           }
         }
@@ -1239,6 +1272,10 @@ void oled_attack::OLED() {
       }
     }
     else if(A_OLED == 90){
+      if(A_OLED != B_OLED){  //ステートが変わったときのみ実行(初期化)
+        Button_select = 0;  //ボタンの選択(next)をデフォルトにする
+        B_OLED = A_OLED;
+      };
       ball.getBallposition();
       display.display();
       display.clearDisplay();
@@ -1313,6 +1350,39 @@ void oled_attack::OLED() {
         }
       }
     }
+    else if(A_OLED == 100){
+      if(A_OLED != B_OLED){  //ステートが変わったときのみ実行(初期化)
+        Button_select = 0;  //ボタンの選択(next)をデフォルトにする
+        B_OLED = A_OLED;
+      };
+      int kick_ = 0;
+      display.display();
+      display.clearDisplay();
+
+      display.setTextSize(3);
+      display.setTextColor(WHITE);
+      display.setCursor(22,0);
+      display.println("Kick");
+      if(digitalRead(Toggle_Switch) != toogle)  //
+      {
+        toogle = digitalRead(Toggle_Switch);
+        kick_ = 1;
+      }
+      kicker.run(kick_);
+      if(aa == 0){
+        if(digitalRead(Tact_Switch[1]) == LOW){  //タクトスイッチが押されたら
+          aa = 1;
+        }
+      }else{
+        if(digitalRead(Tact_Switch[1]) == HIGH){  //タクトスイッチが手から離れたら
+          A_OLED = 0;  //メニュー画面へ戻る
+          kicker.stop();
+          aa = 0;
+        }
+      }
+    }
+
+
 
     int Left = 0;
     int Right = 0;
@@ -1395,7 +1465,7 @@ void oled_attack::OLED() {
       if(Right == 1)  //回転方向を判定
       {
         OLED_select++;  //次の画面へ
-        if(OLED_select > 9)  //選択画面の数以上になったら1に戻す
+        if(OLED_select > 10)  //選択画面の数以上になったら1に戻す
         {
           OLED_select = 1;
         }
