@@ -312,7 +312,7 @@ void oled_attack::OLED() {
         display.setCursor(85,35);
         display.println("Check");
         display.setCursor(88,45);
-        display.println("Any");
+        display.println("B_get");
 
         //タクトスイッチが押されたら(手を離されるまで次のステートに行かせたくないため、変数aaを使っている)
         if(aa == 0){
@@ -326,7 +326,40 @@ void oled_attack::OLED() {
           }
         }
       }
-      else if(OLED_select == 7)  //勝手にデバックしてもろて
+      else if(OLED_select == 7){
+        display.setTextSize(2);
+        if(flash_OLED == 0){  //白黒反転　何秒かの周期で白黒が変化するようにタイマーを使っている（flash_OLEDについて調べたらわかる）
+          display.setTextColor(BLACK, WHITE);
+        }
+        else{
+          display.setTextColor(WHITE);
+        }
+        display.setCursor(0,27);
+        display.println("check");
+        display.setCursor(10,44);
+        display.println("B_get");
+
+        //選択画面で矢印マークを中央に表示
+        display.fillTriangle(70, 43, 64, 37, 64, 49, WHITE);  //▶の描画
+
+        display.setTextSize(1);
+        display.setTextColor(WHITE);
+        display.setCursor(85,40);
+        display.println("setAny");
+
+        //タクトスイッチが押されたら(手を離されるまで次のステートに行かせたくないため、変数aaを使っている)
+        if(aa == 0){
+          if(digitalRead(Tact_Switch[1]) == LOW){  //タクトスイッチが押されたら
+            aa = 1;
+          }
+        }else{
+          if(digitalRead(Tact_Switch[1]) == HIGH){  //タクトスイッチが手から離れたら
+            A_OLED = 90;  //その選択されているステートにレッツゴー
+            aa = 0;
+          }
+        }
+      }
+      else if(OLED_select == 8)  //勝手にデバックしてもろて
       {
         //Check anyの文字設定
         display.setTextSize(2);
@@ -347,7 +380,7 @@ void oled_attack::OLED() {
         display.setTextSize(1);
         display.setTextColor(WHITE);
         display.setCursor(85,40);
-        display.println("START");
+        display.println("checkCam");
 
         //タクトスイッチが押されたら(手を離されるまで次のステートに行かせたくないため、変数aaを使っている)
         if(aa == 0){
@@ -361,7 +394,7 @@ void oled_attack::OLED() {
           }
         }
       }
-      else if(OLED_select == 8){
+      else if(OLED_select == 9){
         //Check Ballの文字設定
         display.setTextSize(2);
         if(flash_OLED == 0){  //白黒反転　何秒かの周期で白黒が変化するようにタイマーを使っている（flash_OLEDについて調べたらわかる）
@@ -1205,6 +1238,81 @@ void oled_attack::OLED() {
         }
       }
     }
+    else if(A_OLED == 90){
+      ball.getBallposition();
+      display.display();
+      display.clearDisplay();
+
+      //テキストサイズと色の設定
+      display.setTextSize(1);
+      display.setTextColor(WHITE);
+
+      display.setCursor(0,0);  //1列目
+      display.println("Left");  //この中に変数名を入力
+      display.setCursor(60,0);
+      display.setTextColor(WHITE);
+      display.println(":");    //この中に知りたい変数を入力
+      display.setCursor(66,0);
+      display.println(ball.get_1);    //この中に知りたい変数を入力
+
+
+      display.setCursor(0,10);  //2列目
+      display.println("Right");  //この中に変数名を入力
+      display.setCursor(60,10);
+      display.setTextColor(WHITE);
+      display.println(":");    //この中に知りたい変数を入力
+      display.setCursor(66,10);
+      display.println(ball.get_2);    //この中に知りたい変数を入力
+
+
+      display.setCursor(0,20); //3列目
+      display.println("sum");  //この中に変数名を入力
+      display.setCursor(60,20);
+      display.setTextColor(WHITE);
+      display.println(":");    //この中に知りたい変数を入力
+      display.setCursor(66,20);
+      display.println(ball.get_val);    //この中に知りたい変数を入力
+
+
+      display.setCursor(0,30); //4列目
+      display.println("A");  //この中に変数名を入力
+      display.setCursor(60,30);
+      display.setTextColor(WHITE);
+      display.println(":");    //この中に知りたい変数を入力
+      display.setCursor(66,30);
+      display.println();    //この中に知りたい変数を入力
+
+
+      display.setCursor(0,40); //5列目
+      display.println("B");  //この中に変数名を入力
+      display.setCursor(60,40);
+      display.setTextColor(WHITE);
+      display.println(":");    //この中に知りたい変数を入力
+      display.setCursor(66,40);
+      display.println();    //この中に知りたい変数を入力
+
+
+      display.setCursor(0,50); //6列目
+      display.println("C");  //この中に変数名を入力
+      display.setCursor(60,50);
+      display.setTextColor(WHITE);
+      display.println(":");    //この中に知りたい変数を入力
+      display.setCursor(66,50);
+      display.println();    //この中に知りたい変数を入力
+
+      //タクトスイッチが押されたら(手を離されるまで次のステートに行かせたくないため、変数aaを使っている)
+      //タクトスイッチが押されたら、メニューに戻る
+      if(aa == 0){
+        if(digitalRead(Tact_Switch[1]) == LOW){  //タクトスイッチが押されたら
+          aa = 1;
+        }
+      }else{
+        if(digitalRead(Tact_Switch[1]) == HIGH){  //タクトスイッチが手から離れたら
+          A_OLED = 0;  //メニュー画面へ戻る
+          aa = 0;
+        }
+      }
+    }
 
     int Left = 0;
     int Right = 0;
@@ -1287,7 +1395,7 @@ void oled_attack::OLED() {
       if(Right == 1)  //回転方向を判定
       {
         OLED_select++;  //次の画面へ
-        if(OLED_select > 8)  //選択画面の数以上になったら1に戻す
+        if(OLED_select > 9)  //選択画面の数以上になったら1に戻す
         {
           OLED_select = 1;
         }
