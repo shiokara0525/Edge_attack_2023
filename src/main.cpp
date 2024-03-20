@@ -463,6 +463,7 @@ void loop() {
   if(digitalReadFast(Tact_Switch[1]) == LOW){
     dribbler.stop();
     MOTOR.motor_0();
+    kicker.stop();
     OLED.OLED();
     max_val = OLED.val_max;
     Target_dir = ac.dir_n;

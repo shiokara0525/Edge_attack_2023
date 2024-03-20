@@ -29,10 +29,10 @@ int Kicker::run(int kick_){
       digitalWrite(K,LOW);
       digitalWrite(led,LOW);
     }
-    else if(kick_time.read_ms() < 80){
-      digitalWrite(C,HIGH);
+    else if(kick_time.read_ms() < 2000){
     }
-    else{
+    else if(kick_time.read_ms() < 5000){
+      digitalWrite(C,HIGH);
       kick_flag = 0;
     }
   }
