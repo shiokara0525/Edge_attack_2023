@@ -27,46 +27,47 @@ timer L_;
 int A = 0;
 int B = 999;
 int c = 0;
-const int ang_180 = 210;
-const int ang_90 = 170;
-const int ang_45 = 105;
-const int ang_10 = 40;
-const int far_th = 130;
+int ang_180 = 210;
+int ang_90 = 170;
+int ang_45 = 105;
+int ang_10 = 40;
+int far_th = 130;
 int go_val = 240;
 int go_val_back = 255;
 int back_flag = 0;
 int print_flag = 1;// 1だったらシリアルプリントする
 int cam_front_on = 0;
 int CFO_B = 999;
+int Gang;
 void OLED_moving();
+void goang_set();
 
 const int Tact_Switch[3] = {38,37,36};
 int ac_val;
+int GVal;
 
 timer CFO_t;
-//======================================================neopiku======================================================//
-#define DELAYVAL 500
-#define PIN        30 
-#define NUMPIXELS 16
 
-int Neo[16] = {12,11,10,9,8,7,6,5,4,3,2,1,0,15,14,13};
-int Neo_p = 999;
-
-Adafruit_NeoPixel pixels(DELAYVAL, PIN, NEO_GRB + NEO_KHZ800);
 //======================================================カメラ======================================================//
+
 int goal_color = 1;  //青が0 黄色が1
 Cam cam_front(3);
 Cam cam_back(4);
+
 //======================================================スタートスイッチ======================================================//
+
 int LED = 13;
 int toogle_f;
 int toogle_P = 27;
 int Target_dir;
+
 //======================================================ライン======================================================//
+
 int Line_flag = 0;
 int line_flag_old = 0;
 int Line_target_dir;
 int L_time;
+
 //======================================================関数たち======================================================/
 
 void setup() {
@@ -77,8 +78,6 @@ void setup() {
   ac.setup();
   cam_front.begin();
   cam_back.begin();
-  pixels.begin();
-  pixels.clear();
   kicker.setup();
   dribbler.setup();
   dribbler.run();
@@ -94,7 +93,10 @@ void setup() {
   }
   OLED.setup();
   OLED.OLED();
+  goang_set();
   Target_dir = ac.dir_n;
+  go_val = OLED.val_max;
+  
 }
 
 void loop() {
@@ -114,6 +116,7 @@ void loop() {
   int kick_ = 0;                       //0だったらキックしない 1だったらキック
   int M_flag = 1;                      //1だったら動き続ける 0だったら止まる
   int dribbler_flag = 0;               //ドリブラーのオンオフ
+  back_flag = 0;
 
 
   //----------------------------------------------------------データの処理----------------------------------------------------------//
@@ -222,7 +225,7 @@ void loop() {
       }
       go_ang = ((ang_45_ - ang_10_) / 35.0 * (abs(ball.ang) - 10) + ang_10_);
       // dribbler_flag = 1;
-      max_val -= 70;
+      max_val -= 40;
     }
     else if(abs(ball.ang) < 90){
       go_ang = ((ang_90_ - ang_45_) / 45.0 * (abs(ball.ang) - 45) + ang_45_);
@@ -246,13 +249,13 @@ void loop() {
     dribbler_flag = 1;
 
     if(cam_front.on == 1){
-      if(abs(cam_front.ang) < 30 && 30 < cam_front.Size){
+      if(abs(cam_front.ang) < 30 && 15 < cam_front.Size){
         cam_front_on = 1;
         go_ang = 0;
         AC_flag = 1;
         // dribbler_flag = 0;
       }
-      else if(abs(cam_front.ang) < 40){
+      else if(abs(cam_front.ang) < 50){
         go_ang = 0;
         AC_flag = 1;
       }
@@ -265,17 +268,16 @@ void loop() {
     }
 
     if(cam_front_on == 1){
+      max_val -= 15;
       if(cam_front_on != CFO_B){
         CFO_B = cam_front_on;
         CFO_t.reset();
       }
-      if(150 < CFO_t.read_ms()){
-        dribbler_flag = 0;
-      }
-      if(250 < CFO_t.read_ms()){
+
+      if(200 < CFO_t.read_ms()){
         kick_ = 1;
       }
-      if(70 < cam_front.Size){
+      if(40 < cam_front.Size){
         kick_ = 1;
       }
     }
@@ -439,8 +441,9 @@ void loop() {
     MOTOR.motor_0();
     kicker.stop();
     OLED.OLED();
-    max_val = OLED.val_max;
+    go_val = OLED.val_max;
     Target_dir = ac.dir_n;
+    goang_set();
   }
 
   if(MOTOR.NoneM_flag == 1){
@@ -449,6 +452,8 @@ void loop() {
   ac_val = AC_val;
   M_time = Main.read_us();
   line_flag_old = line_flag;
+  Gang = go_ang.degree;
+  GVal = max_val;
 }
 
 
@@ -462,18 +467,18 @@ void OLED_moving(){
   OLED.display.setTextColor(WHITE);
   
   OLED.display.setCursor(0,0);  //1列目
-  OLED.display.println("ang");  //現在向いてる角度
+  OLED.display.println("Gang");  //現在向いてる角度
   OLED.display.setCursor(30,0);
   OLED.display.println(":");
   OLED.display.setCursor(36,0);
-  OLED.display.println(ac.dir);    //現在向いてる角度を表示
+  OLED.display.println(Gang);    //現在向いてる角度を表示
 
   OLED.display.setCursor(0,10);  //2列目
-  OLED.display.println("C_A");  //この中に変数名を入力
+  OLED.display.println("Gval");  //この中に変数名を入力
   OLED.display.setCursor(30,10);
   OLED.display.println(":");
   OLED.display.setCursor(36,10);
-  OLED.display.println(cam_front.ang);    //この中に知りたい変数を入力a
+  OLED.display.println(GVal);    //この中に知りたい変数を入力a
 
   OLED.display.setCursor(0,20); //3列目 
   OLED.display.println("CFO");  //この中に変数名を入力
@@ -483,25 +488,33 @@ void OLED_moving(){
   OLED.display.println(cam_front_on);    //この中に知りたい変数を入力
 
   OLED.display.setCursor(0,30); //4列目
-  OLED.display.println("CFO_t");  //この中に変数名を入力
+  OLED.display.println("A");  //この中に変数名を入力
   OLED.display.setCursor(30,30);
   OLED.display.println(":");
   OLED.display.setCursor(36,30);
-  OLED.display.println(CFO_t.read_ms());    //この中に知りたい変数を入力
+  OLED.display.println(A);    //この中に知りたい変数を入力
 
   OLED.display.setCursor(0,40); //5列目
-  OLED.display.println("");  //この中に変数名を入力
+  OLED.display.println("B_get");  //この中に変数名を入力
   OLED.display.setCursor(30,40);
   OLED.display.println(":");
   OLED.display.setCursor(36,40);
-  OLED.display.println();    //この中に知りたい変数を入力
+  OLED.display.println(ball.ball_get);    //この中に知りたい変数を入力
 
   OLED.display.setCursor(0,50); //6列目
-  OLED.display.println("");  //この中に変数名を入力
+  OLED.display.println("time");  //この中に変数名を入力
   OLED.display.setCursor(30,50);
   OLED.display.println(":");
   OLED.display.setCursor(36,50);
-  OLED.display.println();    //この中に知りたい変数を入力
+  OLED.display.println(M_time);    //この中に知りたい変数を入力
+}
+
+
+
+void goang_set(){
+  ang_45 = OLED.check_val[0];
+  ang_90 = OLED.check_val[1];
+  ang_180 = OLED.check_val[2];
 }
 
 
