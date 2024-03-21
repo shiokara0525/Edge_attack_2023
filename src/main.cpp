@@ -55,8 +55,8 @@ int Neo_p = 999;
 Adafruit_NeoPixel pixels(DELAYVAL, PIN, NEO_GRB + NEO_KHZ800);
 //======================================================カメラ======================================================//
 int goal_color = 1;  //青が0 黄色が1
-Cam cam_front(4);
-Cam cam_back(3);
+Cam cam_front(3);
+Cam cam_back(4);
 //======================================================スタートスイッチ======================================================//
 int LED = 13;
 int toogle_f;
@@ -138,21 +138,6 @@ void loop() {
           A = 26;
         }
       }
-      if(line_flag == 11 || line_flag <= 1){
-        if(abs(ball.ang) < 10){
-          A = 12;
-        }
-        else if(abs(ball.ang) < 45 && cam_front.on == 0){
-          A = 27;
-        }
-      }
-    }
-  }
-
-
-  if(A == 12){
-    if(Timer.read_ms() < 400 && abs(ball.ang) < 20){
-      c = 1;
     }
   }
 
@@ -175,12 +160,6 @@ void loop() {
     }
     if(line_flag == 1){
       c = 0;
-    }
-  }
-
-  if(A == 27){
-    if(Timer.read_ms() < 500 && abs(ball.ang) < 45){
-      c = 1;
     }
   }
 
@@ -253,11 +232,6 @@ void loop() {
     }
 
     go_ang = go_ang.degree * (ball.ang < 0 ? -1 : 1);  //角度の正負を元に戻す
-
-    if(abs(ball.ang) < 20){
-      max_val -= 70;
-      dribbler_flag = 1;
-    }
   }
 
 
@@ -272,22 +246,22 @@ void loop() {
     dribbler_flag = 1;
 
     if(cam_front.on == 1){
-      if(abs(cam_front.ang) < 30){
+      if(abs(cam_front.ang) < 30 && 30 < cam_front.Size){
         cam_front_on = 1;
         go_ang = 0;
         AC_flag = 1;
         // dribbler_flag = 0;
       }
       else if(abs(cam_front.ang) < 40){
-        go_ang = cam_front.ang * 1.5;
+        go_ang = 0;
         AC_flag = 1;
       }
       else{
-        go_ang = cam_front.ang * 1.5;
+        go_ang = cam_front.ang * 1.0;
       }
     }
     else{
-      go_ang = 180;
+      go_ang = 0;
     }
 
     if(cam_front_on == 1){
@@ -404,7 +378,7 @@ void loop() {
     AC_val = ac.getAC_val();
   }
   else if(AC_flag == 1){
-    AC_val = ac.getCam_val(cam_front.ang);
+    AC_val = ac.getCam_val(-cam_front.ang);
   }
 
   kicker.run(kick_);
@@ -437,16 +411,16 @@ void loop() {
     // Serial.print(AC_val);
     Serial.print(" | goang : ");
     Serial.print(go_ang.degree);
-    Serial.print(" | ");
-    ball.print();
-    Serial.print(" | CFO : ");
-    Serial.print(CFO_t.read_ms());
+    // Serial.print(" | ");
+    // ball.print();
+    // Serial.print(" | CFO : ");
+    // Serial.print(CFO_t.read_ms());
     // Serial.print(" | dribller_flag : ");
     // Serial.print(dribbler_flag);
     // Serial.print(" | ");
     // line.print();
-    // Serial.print(" | ");
-    // line.print_2();
+    Serial.print(" | ");
+    line.print_2();
     // Serial.print(" | ");
     // ac.print();
     Serial.print(" | ");
@@ -509,25 +483,25 @@ void OLED_moving(){
   OLED.display.println(cam_front_on);    //この中に知りたい変数を入力
 
   OLED.display.setCursor(0,30); //4列目
-  OLED.display.println("get");  //この中に変数名を入力
+  OLED.display.println("CFO_t");  //この中に変数名を入力
   OLED.display.setCursor(30,30);
   OLED.display.println(":");
   OLED.display.setCursor(36,30);
-  OLED.display.println(ball.ball_get);    //この中に知りたい変数を入力
+  OLED.display.println(CFO_t.read_ms());    //この中に知りたい変数を入力
 
   OLED.display.setCursor(0,40); //5列目
-  OLED.display.println("1");  //この中に変数名を入力
+  OLED.display.println("");  //この中に変数名を入力
   OLED.display.setCursor(30,40);
   OLED.display.println(":");
   OLED.display.setCursor(36,40);
-  OLED.display.println(ball.get_1);    //この中に知りたい変数を入力
+  OLED.display.println();    //この中に知りたい変数を入力
 
   OLED.display.setCursor(0,50); //6列目
-  OLED.display.println("2");  //この中に変数名を入力
+  OLED.display.println("");  //この中に変数名を入力
   OLED.display.setCursor(30,50);
   OLED.display.println(":");
   OLED.display.setCursor(36,50);
-  OLED.display.println(ball.get_2);    //この中に知りたい変数を入力
+  OLED.display.println();    //この中に知りたい変数を入力
 }
 
 
@@ -548,7 +522,7 @@ void serialEvent3(){
 
   if(reBuf[0] == 38 && reBuf[5] == 37){
     for(int i = 0; i < 4; i++){
-      cam_back.data_byte[i] = reBuf[i+1];
+      cam_front.data_byte[i] = reBuf[i+1];
     }
   }
 
@@ -576,7 +550,7 @@ void serialEvent4(){
 
   if(reBuf[0] == 38 && reBuf[5] == 37){
     for(int i = 0; i < 4; i++){
-      cam_front.data_byte[i] = reBuf[i+1];
+      cam_back.data_byte[i] = reBuf[i+1];
     }
   }
 

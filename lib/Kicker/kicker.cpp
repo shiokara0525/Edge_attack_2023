@@ -25,11 +25,11 @@ int Kicker::run(int kick_){
       digitalWrite(K,HIGH);
       digitalWrite(led,HIGH);
     }
-    else if(kick_time.read_ms() < 2000){
+    else if(kick_time.read_ms() < 70){
       digitalWrite(K,LOW);
       digitalWrite(led,LOW);
     }
-    else if(kick_time.read_ms() < 5000){
+    else if(kick_time.read_ms() < 80){
       digitalWrite(C,HIGH);
     }
     else{
