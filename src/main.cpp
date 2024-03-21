@@ -146,7 +146,7 @@ void loop() {
 
 
   if(A == 25){
-    if(30 < abs(ball.ang) && abs(ball.ang) < 75){
+    if(30 < abs(ball.ang) && abs(ball.ang) < 100){
       c = 1;
     }
     else{
