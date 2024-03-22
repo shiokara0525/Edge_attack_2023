@@ -42,6 +42,8 @@ int Gang;
 void OLED_moving();
 void goang_set();
 
+int go_flag = 0;
+
 const int Tact_Switch[3] = {38,37,36};
 int ac_val;
 int GVal;
@@ -126,7 +128,8 @@ void loop() {
   int kick_ = 0;                       //0だったらキックしない 1だったらキック
   int M_flag = 1;                      //1だったら動き続ける 0だったら止まる
   int dribbler_flag = 0;               //ドリブラーのオンオフ
-  back_flag = 0;
+  back_flag = 0;                       //ラインから逃げるときのフラグ
+  go_flag = 0;                         //ロボットの進むベクトルの成分を0にしたりするフラグ
 
 
   //----------------------------------------------------------データの処理----------------------------------------------------------//
@@ -224,6 +227,7 @@ void loop() {
     int ang_45_ = ang_45;
     int ang_10_ = ang_10;
     if(40 < cam_front.Size){
+      ang_10_ = 45;
       ang_45_ = 90;
       ang_90_ = 180;
     }

@@ -67,9 +67,13 @@ void motor_attack::moveMotor_0(angle ang,int val,double ac_val,int flag){
   double mval_x = cos(ang.radians);  //進みたいベクトルのx成分
   double mval_y = sin(ang.radians);  //進みたいベクトルのy成分
 
-  
-  Serial.print(ac_val);
-  Serial.print(" | ");
+  if(flag == 1){
+    mval_y = 0;
+  }
+  else if(flag == 2){
+    mval_x = 0;
+  }
+
   max_val -= ac_val;  //姿勢制御とその他のモーターの値を別に考えるために姿勢制御の値を引いておく
   
   for(int i = 0; i < 4; i++){
