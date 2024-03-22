@@ -220,8 +220,15 @@ void loop() {
     if(A != B){
       go_flag = 0;
       if(B == 20 || B == 21){
-        if(abs(ball.ang) < 30){
-          go_flag = 1;
+        if(line.ang_old < 0){
+          if(-60 < ball.ang && ball.ang < 0){
+            go_flag = 1;
+          }
+        }
+        else{
+          if(0 < ball.ang && ball.ang < 60){
+            go_flag = 1;
+          }
         }
       }
       B = A;

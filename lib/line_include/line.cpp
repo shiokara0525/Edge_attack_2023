@@ -103,6 +103,7 @@ int LINE::getLINE_Vec() { //ラインのベクトル(距離,角度)を取得す�
   dis_Y = -Y;
   num = block_num;
   ang = degrees(atan2(dis_Y,dis_X));
+  ang_old = ang;
   if(num == 0){
     LINE_on = 0;
   }
