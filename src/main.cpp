@@ -93,6 +93,16 @@ void setup() {
   }
   OLED.setup();
   OLED.OLED();
+  go_val = OLED.val_max;
+  goal_color = OLED.color;
+  if(goal_color == 0){
+    cam_front.color = 0;  //青が0 黄色が1
+    cam_back.color = 1;  //青が0 黄色が1
+  }
+  else if(goal_color == 1){
+    cam_front.color = 1;  //青が0 黄色が1
+    cam_back.color = 0;  //青が0 黄色が1
+  }
   goang_set();
   Target_dir = ac.dir_n;
   go_val = OLED.val_max;
