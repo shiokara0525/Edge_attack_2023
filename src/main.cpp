@@ -223,6 +223,10 @@ void loop() {
     int ang_90_ = ang_90;
     int ang_45_ = ang_45;
     int ang_10_ = ang_10;
+    if(40 < cam_front.Size){
+      ang_45_ = 90;
+      ang_90_ = 180;
+    }
 
     if(abs(ball.ang) < 10){
       // go_ang = ang_10_ / 10.0 * ball.ang;
@@ -557,11 +561,11 @@ void serialEvent3(){
     }
   }
 
-  for(int i = 0; i < 6; i++){
-    Serial.print(" ");
-    Serial.print(reBuf[i]);
-  }
-  Serial.println();
+  // for(int i = 0; i < 6; i++){
+  //   Serial.print(" ");
+  //   Serial.print(reBuf[i]);
+  // }
+  // Serial.println();
 }
 
 
