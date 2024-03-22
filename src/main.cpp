@@ -129,7 +129,6 @@ void loop() {
   int M_flag = 1;                      //1だったら動き続ける 0だったら止まる
   int dribbler_flag = 0;               //ドリブラーのオンオフ
   back_flag = 0;                       //ラインから逃げるときのフラグ
-  go_flag = 0;                         //ロボットの進むベクトルの成分を0にしたりするフラグ
 
 
   //----------------------------------------------------------データの処理----------------------------------------------------------//
@@ -219,6 +218,12 @@ void loop() {
 
   if(A == 10){  //回り込むやつ
     if(A != B){
+      go_flag = 0;
+      if(B == 20 || B == 21){
+        if(abs(ball.ang) < 30){
+          go_flag = 1;
+        }
+      }
       B = A;
       Timer.reset();
     }
@@ -230,6 +235,10 @@ void loop() {
       ang_10_ = 45;
       ang_45_ = 90;
       ang_90_ = 180;
+    }
+
+    if(45 < abs(ball.ang)){
+      go_flag = 0;
     }
 
     if(abs(ball.ang) < 10){
@@ -253,6 +262,10 @@ void loop() {
     }
 
     go_ang = go_ang.degree * (ball.ang < 0 ? -1 : 1);  //角度の正負を元に戻す
+
+    if(go_flag == 1){
+      go_ang = ball.ang;
+    }
   }
 
 
@@ -507,11 +520,11 @@ void OLED_moving(){
   OLED.display.println(GVal);    //この中に知りたい変数を入力a
 
   OLED.display.setCursor(0,20); //3列目 
-  OLED.display.println("CFO");  //この中に変数名を入力
+  OLED.display.println("Bang");  //この中に変数名を入力
   OLED.display.setCursor(30,20);
   OLED.display.println(":");
   OLED.display.setCursor(36,20);
-  OLED.display.println(cam_front_on);    //この中に知りたい変数を入力
+  OLED.display.println(ball.ang);    //この中に知りたい変数を入力
 
   OLED.display.setCursor(0,30); //4列目
   OLED.display.println("A");  //この中に変数名を入力
