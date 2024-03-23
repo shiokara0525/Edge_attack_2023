@@ -25,7 +25,7 @@ void Cam::begin(){
 
 
 int Cam::getCamdata(){
-    if(data_byte[2] == 0){
+    if(data_byte[0] == 99){
       on = 0;
     }
     else{

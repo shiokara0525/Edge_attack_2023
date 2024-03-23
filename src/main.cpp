@@ -108,7 +108,8 @@ void setup() {
   goang_set();
   Target_dir = ac.dir_n;
   go_val = OLED.val_max;
-  
+  OLED.display.fillScreen(BLACK);
+  OLED.display.display();
 }
 
 void loop() {
@@ -239,7 +240,8 @@ void loop() {
     int ang_45_ = ang_45;
     int ang_10_ = ang_10;
     if(40 < cam_front.Size){
-      ang_10_ = 45;
+      max_val -= 30;
+      ang_10_ = 60;
       ang_45_ = 90;
       ang_90_ = 180;
     }
@@ -479,6 +481,7 @@ void loop() {
     MOTOR.motor_0();
     kicker.stop();
     OLED.OLED();
+    goal_color = OLED.color;
     if(goal_color == 0){
       cam_front.color = 0;  //青が0 黄色が1
       cam_back.color = 1;  //青が0 黄色が1
@@ -490,6 +493,8 @@ void loop() {
     go_val = OLED.val_max;
     Target_dir = ac.dir_n;
     goang_set();
+    OLED.display.fillScreen(BLACK);
+    OLED.display.display();
   }
 
   if(MOTOR.NoneM_flag == 1){
@@ -585,11 +590,11 @@ void serialEvent3(){
     }
   }
 
-  // for(int i = 0; i < 6; i++){
-  //   Serial.print(" ");
-  //   Serial.print(reBuf[i]);
-  // }
-  // Serial.println();
+  for(int i = 0; i < 6; i++){
+    Serial.print(" ");
+    Serial.print(reBuf[i]);
+  }
+  Serial.println();
 }
 
 
