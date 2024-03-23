@@ -23,6 +23,7 @@ timer Timer;
 timer Main;
 int M_time;
 timer L_;
+timer start_t;
 
 int A = 0;
 int B = 999;
@@ -109,6 +110,7 @@ void setup() {
   go_val = OLED.val_max;
   OLED.display.fillScreen(BLACK);
   OLED.display.display();
+  start_t.reset();
 }
 
 void loop() {
@@ -211,7 +213,8 @@ void loop() {
     if(A != B){
       B = A;
     }
-    M_flag = 0;
+    go_ang = 180;
+    max_val = 200;
   }
 
 
@@ -221,12 +224,12 @@ void loop() {
       go_flag = 0;
       if(B == 20 || B == 21){
         if(line.ang_old < 0){
-          if(-60 < ball.ang && ball.ang < 0){
+          if(-90 < ball.ang && ball.ang < 30){
             go_flag = 1;
           }
         }
         else{
-          if(0 < ball.ang && ball.ang < 60){
+          if(-30 < ball.ang && ball.ang < 90){
             go_flag = 1;
           }
         }
@@ -238,14 +241,17 @@ void loop() {
     int ang_90_ = ang_90;
     int ang_45_ = ang_45;
     int ang_10_ = ang_10;
-    if(40 < cam_front.Size){
+
+    int N_flag = 0;
+    if(40 < cam_front.Size && 45 < abs(cam_front.ang)){
+      N_flag = 1;
       max_val -= 30;
-      ang_10_ = 60;
-      ang_45_ = 90;
-      ang_90_ = 180;
+      ang_10_ = 30;
+      ang_45_ = 60;
+      ang_90_ = 160;
     }
 
-    if(45 < abs(ball.ang)){
+    if(90 < abs(ball.ang)){
       go_flag = 0;
     }
 
@@ -255,7 +261,7 @@ void loop() {
       dribbler_flag = 1;
     }
     else if(abs(ball.ang) < 45){
-      if(ball.far < 178){
+      if(5000 < start_t.read_ms() && ball.far < 178 && N_flag == 0){
         ang_10_ = 90;
       }
       go_ang = ((ang_45_ - ang_10_) / 35.0 * (abs(ball.ang) - 10) + ang_10_);
@@ -419,7 +425,12 @@ void loop() {
     AC_val = ac.getAC_val();
   }
   else if(AC_flag == 1){
-    AC_val = ac.getCam_val(-cam_front.ang);
+    if(40 < cam_front.Size){
+      AC_val = ac.getCam_val(-cam_front.ang) * 1.5;
+    }
+    else{
+      AC_val = ac.getCam_val(-cam_front.ang);
+    }
   }
 
   kicker.run(kick_);
@@ -493,6 +504,7 @@ void loop() {
     goang_set();
     OLED.display.fillScreen(BLACK);
     OLED.display.display();
+    start_t.reset();
   }
 
   if(MOTOR.NoneM_flag == 1){
@@ -551,11 +563,11 @@ void OLED_moving(){
   OLED.display.println(ball.ball_get);    //この中に知りたい変数を入力
 
   OLED.display.setCursor(0,50); //6列目
-  OLED.display.println("time");  //この中に変数名を入力
+  OLED.display.println("G_F");  //この中に変数名を入力
   OLED.display.setCursor(30,50);
   OLED.display.println(":");
   OLED.display.setCursor(36,50);
-  OLED.display.println(M_time);    //この中に知りたい変数を入力
+  OLED.display.println(go_flag);    //この中に知りたい変数を入力
 }
 
 
