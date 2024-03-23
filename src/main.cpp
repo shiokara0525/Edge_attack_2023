@@ -39,6 +39,7 @@ int back_flag = 0;
 int print_flag = 1;// 1だったらシリアルプリントする
 int cam_front_on = 0;
 int CFO_B = 999;
+int back_count = 0;
 int Gang;
 void OLED_moving();
 void goang_set();
@@ -156,6 +157,32 @@ void loop() {
           A = 26;
         }
       }
+      else if(Line_flag == 11 || Line_flag <= 1){
+        back_count++;
+        if(back_count % 4 == 0){
+          Timer.reset();
+          A = 22;
+          c = 1;
+        }
+      }
+    }
+  }
+
+
+  if(A == 22){
+    if((line_flag == 0 || -1 < line.dis_X)){
+      c = 1;
+    }
+    else{
+      A = 23;
+
+    }
+  }
+
+
+  if(A == 23){
+    if(line_flag){
+      c = 1;
     }
   }
 
@@ -392,6 +419,27 @@ void loop() {
 
 
 
+  if(A == 22){
+    Serial.print("!!!!!!!!!!!!!!!");
+    if(A != B){
+      B = A;
+      Timer.reset();
+    }
+    max_val = 150;
+    go_ang = 0;
+  }
+
+
+
+  if(A == 23){
+    if(A != B){
+      B = A;
+    }
+    go_ang = 180;
+  }
+
+
+
   if(A == 25){  //後ろのライン読んだとき前に進むやつ
     if(A != B){
       B = A;
@@ -481,16 +529,16 @@ void loop() {
     // Serial.print(CFO_t.read_ms());
     // Serial.print(" | dribller_flag : ");
     // Serial.print(dribbler_flag);
-    // Serial.print(" | ");
-    // line.print();
     Serial.print(" | ");
-    line.print_2();
+    line.print();
+    // Serial.print(" | ");
+    // line.print_2();
     // Serial.print(" | ");
     // ac.print();
     Serial.print(" | ");
     cam_front.print();
-    Serial.print(" | ac : ");
-    Serial.print(AC_val);
+    // Serial.print(" | ac : ");
+    // Serial.print(AC_val);
     // Serial.print(" | ");
     // Serial.print(L_time);
     // Serial.print(" | ");
@@ -576,11 +624,11 @@ void OLED_moving(){
   OLED.display.println(M_F);    //この中に知りたい変数を入力
 
   OLED.display.setCursor(0,50); //6列目
-  OLED.display.println("G_F");  //この中に変数名を入力
+  OLED.display.println("B_c");  //この中に変数名を入力
   OLED.display.setCursor(30,50);
   OLED.display.println(":");
   OLED.display.setCursor(36,50);
-  OLED.display.println(go_flag);    //この中に知りたい変数を入力
+  OLED.display.println(back_count);    //この中に知りたい変数を入力
 }
 
 
@@ -613,11 +661,11 @@ void serialEvent3(){
     }
   }
 
-  for(int i = 0; i < 6; i++){
-    Serial.print(" ");
-    Serial.print(reBuf[i]);
-  }
-  Serial.println();
+  // for(int i = 0; i < 6; i++){
+  //   Serial.print(" ");
+  //   Serial.print(reBuf[i]);
+  // }
+  // Serial.println();
 }
 
 
