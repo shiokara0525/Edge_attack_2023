@@ -158,11 +158,21 @@ void loop() {
         }
       }
       else if(Line_flag == 11 || Line_flag <= 1){
-        back_count++;
-        if(back_count % 4 == 0){
-          Timer.reset();
-          A = 22;
-          c = 1;
+        if(cam_front.on){
+          back_count++;
+          if(back_count % 4 == 0){
+            Timer.reset();
+            A = 22;
+            c = 1;
+          }
+        }
+        else{
+          back_count++;
+          if(back_count % 4 == 0){
+            Timer.reset();
+            A = 24;
+            c = 1;
+          }
         }
       }
     }
@@ -170,18 +180,25 @@ void loop() {
 
 
   if(A == 22){
-    if((line_flag == 0 || -1 < line.dis_X)){
+    if((line_flag == 0 || -1 < line.dis_X) && Timer.read_ms() < 5000){
       c = 1;
     }
     else{
       A = 23;
-
     }
   }
 
 
   if(A == 23){
     if(line_flag){
+      c = 1;
+    }
+  }
+  
+
+
+  if(A == 24){
+    if(abs(ball.ang) < 60 && Timer.read_ms() < 7000 && line_flag == 0){
       c = 1;
     }
   }
@@ -436,6 +453,22 @@ void loop() {
       B = A;
     }
     go_ang = 180;
+  }
+
+
+
+  if(A == 24){
+    if(A != B){
+      B = A;
+      Timer.reset();
+    }
+    if(Timer.read_ms() < 500){
+      go_ang = 180;
+      max_val = 180;
+    }
+    else{
+      M_flag = 0;
+    }
   }
 
 
