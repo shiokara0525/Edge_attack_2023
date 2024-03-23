@@ -212,9 +212,16 @@ void loop() {
   if(A == 5){  //ボールがない時止まる
     if(A != B){
       B = A;
+      Timer.reset();
     }
-    go_ang = 180;
-    max_val = 200;
+
+    if(Timer.read_ms() < 500){
+      go_ang = 180;
+      max_val = 200;
+    }
+    else{
+      M_flag = 0;
+    }
   }
 
 
@@ -247,7 +254,7 @@ void loop() {
       N_flag = 1;
       max_val -= 30;
       ang_10_ = 30;
-      ang_45_ = 60;
+      ang_45_ = 45;
       ang_90_ = 160;
     }
 
@@ -294,7 +301,7 @@ void loop() {
     dribbler_flag = 1;
 
     if(cam_front.on == 1){
-      if(abs(cam_front.ang) < 30 && 15 < cam_front.Size){
+      if(abs(cam_front.ang) < 20 && 15 < cam_front.Size){
         cam_front_on = 1;
         go_ang = 0;
         AC_flag = 1;
