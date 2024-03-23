@@ -106,7 +106,6 @@ void setup() {
     cam_back.color = 0;  //青が0 黄色が1
   }
   goang_set();
-  Target_dir = ac.dir_n;
   go_val = OLED.val_max;
   OLED.display.fillScreen(BLACK);
   OLED.display.display();
@@ -491,7 +490,6 @@ void loop() {
       cam_back.color = 0;  //青が0 黄色が1
     }
     go_val = OLED.val_max;
-    Target_dir = ac.dir_n;
     goang_set();
     OLED.display.fillScreen(BLACK);
     OLED.display.display();

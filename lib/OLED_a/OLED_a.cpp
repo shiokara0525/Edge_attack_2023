@@ -526,7 +526,8 @@ void oled_attack::OLED() {
         if(digitalRead(Tact_Switch[1]) == HIGH){  //タクトスイッチが手から離れたら
           if(Button_select == 0)  //nextが選択されていたら
           {
-            ac.setup_2();  //姿勢制御の値リセットするぜい
+            Target_dir = ac.dir_n;
+            ac.setup_2();
             A_OLED = 12;  //コート方向判定
           }
           else if(Button_select == 1)  //exitが選択されていたら
@@ -694,6 +695,7 @@ void oled_attack::OLED() {
           else if(Button_select == 1)  //SetDir Againが選択されていたら
           {
             ac.setup_2();  //姿勢制御の値リセットするぜい
+            Target_dir = ac.dir_n;
           }
           else if(Button_select == 2)  //NoneMが選択されていたら
           {

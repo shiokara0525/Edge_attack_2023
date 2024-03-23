@@ -21,6 +21,7 @@ extern BALL ball;
 extern LINE line;
 extern motor_attack MOTOR;
 extern Kicker kicker;
+extern int Target_dir;
 
 /*------------------------------------------------------------------------------------------------------------*/
 
