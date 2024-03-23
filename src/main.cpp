@@ -48,6 +48,7 @@ int go_flag = 0;
 const int Tact_Switch[3] = {38,37,36};
 int ac_val;
 int GVal;
+int M_F;
 
 timer CFO_t;
 
@@ -180,6 +181,10 @@ void loop() {
     }
   }
 
+  if(ball.flag == 0){
+    c = 0;
+  }
+
 
   if(c == 0){
     if(line_flag == 1){
@@ -307,7 +312,7 @@ void loop() {
         AC_flag = 1;
         // dribbler_flag = 0;
       }
-      else if(abs(cam_front.ang) < 50){
+      else if(abs(cam_front.ang) < 60){
         go_ang = 0;
         AC_flag = 1;
       }
@@ -522,6 +527,7 @@ void loop() {
   line_flag_old = line_flag;
   Gang = go_ang.degree;
   GVal = max_val;
+  M_F = M_flag;
 }
 
 
@@ -563,11 +569,11 @@ void OLED_moving(){
   OLED.display.println(A);    //この中に知りたい変数を入力
 
   OLED.display.setCursor(0,40); //5列目
-  OLED.display.println("B_get");  //この中に変数名を入力
+  OLED.display.println("M_F");  //この中に変数名を入力
   OLED.display.setCursor(30,40);
   OLED.display.println(":");
   OLED.display.setCursor(36,40);
-  OLED.display.println(ball.ball_get);    //この中に知りたい変数を入力
+  OLED.display.println(M_F);    //この中に知りたい変数を入力
 
   OLED.display.setCursor(0,50); //6列目
   OLED.display.println("G_F");  //この中に変数名を入力
