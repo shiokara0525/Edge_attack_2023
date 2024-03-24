@@ -42,6 +42,7 @@ int cam_front_on = 0;
 int CFO_B = 999;
 int back_count = 0;
 int Gang;
+int setup_flag = 0;
 void OLED_moving();
 void goang_set();
 

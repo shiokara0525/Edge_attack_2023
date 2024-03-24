@@ -1488,8 +1488,11 @@ void oled_attack::OLED() {
     {
       if(Right == 1)  //回転方向を判定
       {
-        if(Button_selectCF < 2){
-          Button_selectCF++;  //next
+        Button_selectCF++;  //next
+        if(Button_selectCF < 3){
+        }
+        else{
+          Button_selectCF = 0;
         }
       }
       else if(Left== 1)
