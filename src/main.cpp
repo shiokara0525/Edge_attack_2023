@@ -24,6 +24,7 @@ timer Main;
 int M_time;
 timer L_;
 timer start_t;
+timer A_24_t;
 
 int A = 0;
 int B = 999;
@@ -175,12 +176,17 @@ void loop() {
           }
         }
       }
+      else{
+        if(!cam_front.on){
+          back_count++;
+        }
+      }
     }
   }
 
 
   if(A == 22){
-    if((line_flag == 0 || -1 < line.dis_X) && Timer.read_ms() < 5000){
+    if((line_flag == 0 || (-1 < line.dis_X && (abs(line.ang) < 30 || 150 < abs(line.ang)))) && Timer.read_ms() < 5000 && abs(ball.ang) < 30){
       c = 1;
     }
     else{
@@ -198,7 +204,7 @@ void loop() {
 
 
   if(A == 24){
-    if(abs(ball.ang) < 60 && Timer.read_ms() < 7000 && line_flag == 0){
+    if(abs(ball.ang) < 45 && Timer.read_ms() < 7000 && line_flag == 0){
       c = 1;
     }
   }
@@ -462,6 +468,7 @@ void loop() {
       B = A;
       Timer.reset();
     }
+    A_24_t.reset();
     if(Timer.read_ms() < 500){
       go_ang = 180;
       max_val = 180;
@@ -518,7 +525,7 @@ void loop() {
     AC_val = ac.getAC_val();
   }
   else if(AC_flag == 1){
-    if(40 < cam_front.Size){
+    if(40 < cam_front.Size && 500 < A_24_t.read_ms()){
       AC_val = ac.getCam_val(-cam_front.ang) * 1.5;
     }
     else{
