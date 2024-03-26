@@ -41,8 +41,12 @@ class oled_attack{
     unsigned int address = 0x00;  //EEPROMのアドレス
     int toogle = 0;  //トグルスイッチの値を記録（トグルを引くときに使う）
     int goDir;  //loop関数ないしか使えないangle go_ang.degressの値をぶち込んでグローバルに使うために作った税
+    int end_flag = 0;
+
     void setup();
     void OLED();
+    void start();
+    void end();
     int display_main();
     int display_start();
     int display_selectColor();
@@ -78,24 +82,6 @@ class oled_attack{
     int OLED_select = 1;  //スイッチが押されたときにどこを選択しているかを示す変数(この数字によって選択画面の表示が変化する)
     int Button_select = 0;  //スイッチが押されたときにどこを選択しているかを示す変数(この数字によってexitかnextかが決まる)
 
-    int OLED_ball_x = 0;
-    int OLED_ball_y = 0;
-
-    int OLED_cam_x = 0;
-    int OLED_cam_y = 0;
-
-    float line_x = 0;
-    float line_y = 0;
-
-    float Ax = 0;
-    float Ay = 0;
-    float Bx = 0;
-    float By = 0;
-
-    int OLED_line_ax = 0;
-    int OLED_line_ay = 0;
-    int OLED_line_bx = 0;
-    int OLED_line_by = 0;
 
     int check_select = 0;
     int check_flag = 0;

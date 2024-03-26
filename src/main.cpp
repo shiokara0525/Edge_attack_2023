@@ -105,26 +105,37 @@ void setup() {
 }
 
 void loop() {
-  if(Mode == 0){
-    if(Mode != Mode_old){
-      Mode_old = Mode;
-      OLED.display.display();
-      OLED.display.clearDisplay();
-
-      OLED.timer_OLED.reset(); //タイマーのリセット(OLED用)
-      OLED.toogle = digitalRead(OLED.Toggle_Switch);
-    }
-    OLED.OLED();
-  }
-  else if(Mode == 1){
-
-  }
-
-  Main.reset();
   ball.getBallposition();
   cam_front.getCamdata();
   cam_back.getCamdata();
   int line_flag = line.getLINE_Vec();  //ラインセンサの入力
+
+  if(Mode == 0){
+    if(Mode != Mode_old){
+      Mode_old = Mode;
+      OLED.start();
+    }
+    OLED.OLED();
+    if(OLED.end_flag){
+      Mode = 1;
+    }
+  }
+  else if(Mode == 1){
+    if(Mode != Mode_old){
+      Mode_old = Mode;
+      goang_set();
+      start_t.reset();
+    }
+
+    if(digitalReadFast(Tact_Switch[1]) == LOW){
+      dribbler.stop();
+      MOTOR.motor_0();
+      kicker.stop();
+      Mode = 0;
+    }
+  }
+
+  Main.reset();
   angle go_ang(ball.ang,true);         //進む角度のオブジェクト
 
   float AC_val = 100;                  //姿勢制御の出力
@@ -170,27 +181,6 @@ void loop() {
     // Serial.print(" | ");
     // Serial.print(M_time);
     Serial.println();
-  }
-
-  if(digitalReadFast(Tact_Switch[1]) == LOW){
-    dribbler.stop();
-    MOTOR.motor_0();
-    kicker.stop();
-    OLED.OLED();
-    goal_color = OLED.color;
-    if(goal_color == 0){
-      cam_front.color = 0;  //青が0 黄色が1
-      cam_back.color = 1;  //青が0 黄色が1
-    }
-    else if(goal_color == 1){
-      cam_front.color = 1;  //青が0 黄色が1
-      cam_back.color = 0;  //青が0 黄色が1
-    }
-    go_val = OLED.val_max;
-    goang_set();
-    OLED.display.fillScreen(BLACK);
-    OLED.display.display();
-    start_t.reset();
   }
 
   if(MOTOR.NoneM_flag == 1){
@@ -263,6 +253,16 @@ void goang_set(){
   ang_45 = OLED.check_val[0];
   ang_90 = OLED.check_val[1];
   ang_180 = OLED.check_val[2];
+  goal_color = OLED.color;
+  if(goal_color == 0){
+    cam_front.color = 0;  //青が0 黄色が1
+    cam_back.color = 1;  //青が0 黄色が1
+  }
+  else if(goal_color == 1){
+    cam_front.color = 1;  //青が0 黄色が1
+    cam_back.color = 0;  //青が0 黄色が1
+  }
+  go_val = OLED.val_max;
 }
 
 

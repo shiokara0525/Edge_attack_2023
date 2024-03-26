@@ -23,6 +23,47 @@ void oled_attack::setup(){
 
 
 
+void oled_attack::start(){
+  MOTOR.NoneM_flag = 0;  //モーター動作ありのフラグ
+  A = 0;
+  B = 999;
+  timer_OLED.reset();
+
+  flash_OLED = 0;
+  OLED_select = 1;
+  Button_select = 0;
+
+  toogle = digitalRead(Toggle_Switch);
+
+  Sentor = 0;
+  Left = 0;
+  Right = 0;
+
+  Left_A = 0;
+  Right_A = 0;
+  Sentor_A = 0;
+
+  Left_t.reset();
+  Right_t.reset();
+  Sentor_t.reset();
+
+  check_select = 0;
+  check_flag = 0;
+  end_flag = 0;
+
+  display.display();
+  display.clearDisplay();
+}
+
+
+
+void oled_attack::end(){
+  display.fillScreen(BLACK);
+  end_flag = 1;
+}
+
+
+
 
 void oled_attack::OLED() {
   if(timer_OLED.read_ms() > 500){
@@ -49,31 +90,87 @@ void oled_attack::OLED() {
       Button_select = 0;  //ボタンの選択(next)をデフォルトにする
       B = A;
     }
+
     display_start();
+    if(Sentor){
+      if(Button_select == 0){
+        Target_dir = ac.dir_n;
+        ac.setup_2();
+        A = 12;  //コート方向判定
+      }
+      else if(Button_select == 1){
+        A = 0;  //メニュー画面に戻る
+      }
+    }
   }
-  else if(A == 12)
-  {
+  else if(A == 12){
     if(A != B){  //ステートが変わったときのみ実行(初期化)
       Button_select = 0;  //ボタンの選択(setDir)をデフォルトにする
       B = A;
     }
+
     display_selectColor();
+    if(Sentor){  //タクトスイッチが手から離れたら
+      if(Button_selectCF == 0){
+        color = 1;  //YELLOW
+        A = 15;  //スタート画面に行く
+      }
+      else if(Button_selectCF == 2){
+        color = 0;  //BLUE
+        A = 15;  //スタート画面に行く
+      }
+      else if(Button_selectCF == 1){
+        A = 0;  //メニュー画面に戻る
+      }
+      address = 0x00;  //EEPROMのアドレスを0x00にする（リセット）
+      address = sizeof(line.LINE_Level) + sizeof(RA_size) + sizeof(val_max);  //アドレスを次の変数のアドレスにする
+      EEPROM.put(address, Button_selectCF);  //EEPROMにボールの閾値を保存
+    }
   }
-  else if(A == 15)  //トグルを傾けたらロボット動作開始
-  {
+  else if(A == 15){
     if(A != B){  //ステートが変わったときのみ実行(初期化)
       Button_select = 1;  //ボタンの選択(setDir)をデフォルトにする
       B = A;
     }
+
     display_waitStart();
+    if(Sentor){  //タクトスイッチが手から離れたら
+      if(Button_select == 0){
+        A = 0;  //メニュー画面に戻る
+      }
+      else if(Button_select == 1){
+        ac.setup_2();  //姿勢制御の値リセットするぜい
+        Target_dir = ac.dir_n;
+      }
+      else if(Button_select == 2){
+        MOTOR.NoneM_flag = 1;  //モーター動作なしバージョンのフラグを立てる
+      }
+    }
+    if(digitalRead(Toggle_Switch) != toogle){
+      toogle = digitalRead(Toggle_Switch);
+      display.clearDisplay(); //初期化してI2Cバスを解放する
+      end();
+    }
   }
-  else if(A == 20)  //Set Line
-  {
+  else if(A == 20){
     if(A != B){  //ステートが変わったときのみ実行(初期化)
       Button_select = 0;  //ボタンの選択(next)をデフォルトにする
       B = A;
     }
+
     set_Line_Threshold();
+    if(Sentor){  //タクトスイッチが手から離れたら
+      Serial6.write(38);
+      Serial6.write(0);
+      Serial6.write(line.LINE_Level);
+      Serial6.write(37);
+      Serial.print("!!!!!!");
+      address = 0x00;  //EEPROMのアドレスを0x00にする
+      // line.LINE_Level = 700;  //初めにデータをセットしておかなければならない
+      EEPROM.put(address, line.LINE_Level);  //EEPROMにラインの閾値を保存
+
+      A = 0;  //メニュー画面へ戻る
+    }
   }
   else if(A == 30)  //Check Line
   {
@@ -82,13 +179,26 @@ void oled_attack::OLED() {
       B = A;
     }
     display_Line();
+    if(Sentor){
+      A = 0;
+    }
   }
   else if(A == 40){
     if(A != B){  //ステートが変わったときのみ実行(初期化)
       Button_select = 0;  //ボタンの選択(next)をデフォルトにする
       B = A;
     }
+
     set_getBall_Threshold();
+    if(Sentor){  //タクトスイッチが手から離れたら
+      address = 0x00;  //EEPROMのアドレスを0x00にする
+      address += sizeof(line.LINE_Level) + sizeof(RA_size) + sizeof(val_max) + sizeof(Button_selectCF);  //アドレスを次の変数のアドレスにする
+      for(int i = 0; i < 6; i++){
+        address += sizeof(check_val[i]);
+      }  
+      EEPROM.put(address, ball.get_th);  //EEPROMにラインの閾値を保存
+      A = 0;  //メニュー画面へ戻る
+    }
   }
   else if(A == 50)  //Check Ball
   {
@@ -97,21 +207,50 @@ void oled_attack::OLED() {
       B = A;
     }
     display_Ball();
+    if(Sentor){
+      A = 0;
+    }
   }
-  else if(A == 60)  //Set Motar
-  {
+  else if(A == 60){
     if(A != B){  //ステートが変わったときのみ実行(初期化)
       Button_select = 0;  //ボタンの選択(next)をデフォルトにする
       B = A;
     }
     set_MotorVal();
+    if(Sentor){  //タクトスイッチが手から離れたら
+      address = 0x00;  //EEPROMのアドレスを0x00にする（リセット）
+      address = sizeof(line.LINE_Level) + sizeof(RA_size);  //アドレスを次の変数のアドレスにする
+      // val_max = 100;  //初めにデータをセットしておかなければならない
+      EEPROM.put(address, val_max);  //EEPROMにボールの閾値を保存
+      A = 0;  //メニュー画面へ戻る
+    }
   }
   else if(A == 70){
     if(A != B){  //ステートが変わったときのみ実行(初期化)
       Button_select = 0;  //ボタンの選択(next)をデフォルトにする
       B = A;
     }
+
     set_Avaliable();
+    if(Sentor){  //タクトスイッチが手から離れたら
+      if(check_flag == 0){
+        if(check_select == -1 || check_select == 6){
+          A = 0;  //メニュー画面へ戻る
+        }
+        else{
+          check_flag = 1;
+        }
+      }
+      else{
+        check_flag = 0;
+        address = 0;
+        address += sizeof(line.LINE_Level) + sizeof(RA_size) + sizeof(val_max) + sizeof(Button_selectCF);  //アドレスを次の変数のアドレスにする
+        for(int i = 0; i < check_select; i++){
+          address += sizeof(check_val[i]);
+        }
+        EEPROM.put(address, check_val[check_select]);  //EEPROMにボールの閾値を保存
+      }
+    }
   }
   else if(A == 80){
     if(A != B){  //ステートが変わったときのみ実行(初期化)
@@ -119,6 +258,9 @@ void oled_attack::OLED() {
       B = A;
     }
     display_Cam();
+    if(Sentor){
+      A = 0;
+    }
   }
   else if(A == 90){
     if(A != B){  //ステートが変わったときのみ実行(初期化)
@@ -126,13 +268,27 @@ void oled_attack::OLED() {
       B = A;
     }
     display_getBall();
+    if(Sentor){
+      A = 0;
+    }
   }
   else if(A == 100){
     if(A != B){  //ステートが変わったときのみ実行(初期化)
       Button_select = 0;  //ボタンの選択(next)をデフォルトにする
       B = A;
     };
+    int kick_ = 0;
+
     Kick_test();
+    if(digitalRead(Toggle_Switch) != toogle){
+      toogle = digitalRead(Toggle_Switch);
+      kick_ = 1;
+    }
+    kicker.run(kick_);
+    if(Sentor){
+      A = 0;
+      kicker.stop();
+    }
   }
 }
 
@@ -551,12 +707,12 @@ int oled_attack::display_main(){
     if(Sentor){
       A = 100;
     }
+  }
 
-    if(Right == 1){
-      OLED_select++;  //次の画面へ
-      if(OLED_select > 10){
-        OLED_select = 1;
-      }
+  if(Right == 1){
+    OLED_select++;  //次の画面へ
+    if(OLED_select > 10){
+      OLED_select = 1;
     }
   }
 }
@@ -610,17 +766,6 @@ int oled_attack::display_start(){
   display.println("Next");
 
   //タクトスイッチが押されたら(手を離されるまで次のステートに行かせたくないため、変数aaを使っている)
-  if(Sentor){
-    if(Button_select == 0){
-      Target_dir = ac.dir_n;
-      ac.setup_2();
-      A = 12;  //コート方向判定
-    }
-    else if(Button_select == 1){
-      A = 0;  //メニュー画面に戻る
-    }
-    aa = 0;
-  }
   if(Right == 1){
     Button_select = 0;  //next
   }
@@ -677,25 +822,6 @@ int oled_attack::display_selectColor(){
   display.println("Blue");
 
   //タクトスイッチが押されたら(手を離されるまで次のステートに行かせたくないため、変数aaを使っている)
-  if(Sentor){  //タクトスイッチが手から離れたら
-    if(Button_selectCF == 0)  //yellowが選択されていたら
-    {
-      color = 1;
-      A = 15;  //スタート画面に行く
-    }
-    else if(Button_selectCF == 2)  //blueが選択されていたら
-    {
-      color = 0;
-      A = 15;  //スタート画面に行く
-    }
-    else if(Button_selectCF == 1)  //exitが選択されていたら
-    {
-      A = 0;  //メニュー画面に戻る
-    }
-    address = 0x00;  //EEPROMのアドレスを0x00にする（リセット）
-    address = sizeof(line.LINE_Level) + sizeof(RA_size) + sizeof(val_max);  //アドレスを次の変数のアドレスにする
-    EEPROM.put(address, Button_selectCF);  //EEPROMにボールの閾値を保存
-  }
 
   if(Right == 1){
     Button_selectCF++;  //next
@@ -774,18 +900,6 @@ int oled_attack::display_waitStart(){
   display.println("NoneM");
 
   //タクトスイッチが押されたら(手を離されるまで次のステートに行かせたくないため、変数aaを使っている)
-  if(Sentor){  //タクトスイッチが手から離れたら
-    if(Button_select == 0){
-      A = 0;  //メニュー画面に戻る
-    }
-    else if(Button_select == 1){
-      ac.setup_2();  //姿勢制御の値リセットするぜい
-      Target_dir = ac.dir_n;
-    }
-    else if(Button_select == 2){
-      MOTOR.NoneM_flag = 1;  //モーター動作なしバージョンのフラグを立てる
-    }
-  }
 
   if(Right == 1){
     if(Button_select < 2){
@@ -796,12 +910,6 @@ int oled_attack::display_waitStart(){
     if(Button_select  > 0){
       Button_select--;  //next
     }
-  }
-  
-  if(digitalRead(Toggle_Switch) != toogle)  //
-  {
-    toogle = digitalRead(Toggle_Switch);
-    display.clearDisplay(); //初期化してI2Cバスを解放する
   }
 }
 
@@ -845,13 +953,6 @@ int oled_attack::set_MotorVal(){
 
   //タクトスイッチが押されたら(手を離されるまで次のステートに行かせたくないため、変数aaを使っている)
   //タクトスイッチが押されたら、メニューに戻る
-  if(Sentor){  //タクトスイッチが手から離れたら
-    address = 0x00;  //EEPROMのアドレスを0x00にする（リセット）
-    address = sizeof(line.LINE_Level) + sizeof(RA_size);  //アドレスを次の変数のアドレスにする
-    // val_max = 100;  //初めにデータをセットしておかなければならない
-    EEPROM.put(address, val_max);  //EEPROMにボールの閾値を保存
-    A = 0;  //メニュー画面へ戻る
-  }
   if(Right == 1){
     if(val_max < 1023){
       val_max++;
@@ -905,19 +1006,7 @@ int oled_attack::set_Line_Threshold(){
 
   //タクトスイッチが押されたら(手を離されるまで次のステートに行かせたくないため、変数aaを使っている)
   //タクトスイッチが押されたら、メニューに戻る
-  if(Sentor){  //タクトスイッチが手から離れたら
-    Serial6.write(38);
-    Serial6.write(0);
-    Serial6.write(line.LINE_Level);
-    Serial6.write(37);
-    Serial.print("!!!!!!");
-    address = 0x00;  //EEPROMのアドレスを0x00にする
-    // line.LINE_Level = 700;  //初めにデータをセットしておかなければならない
-    EEPROM.put(address, line.LINE_Level);  //EEPROMにラインの閾値を保存
 
-    A = 0;  //メニュー画面へ戻る
-    aa = 0;
-  }
   if(Right == 1){
     if(line.LINE_Level < 1023){
       line.LINE_Level++;
@@ -941,20 +1030,20 @@ int oled_attack::display_Line(){
   display.drawCircle(32, 32, 30, WHITE);  //○ 20
 
   //ラインの直線と円の交点の座標を求める
-  line_y = line.dis * cos(radians(line.ang));  //ラインのx座標
-  line_x = line.dis * sin(radians(line.ang));  //ラインのy座標
+  float line_y = line.dis * cos(radians(line.ang));  //ラインのx座標
+  float line_x = line.dis * sin(radians(line.ang));  //ラインのy座標
 
-  Ax = line_x - line_y * sqrt(9 - pow(line.dis, 2)) / line.dis;
-  Ay = line_y + line_x * sqrt(9 - pow(line.dis, 2)) / line.dis;
-  Bx = line_x + line_y * sqrt(9 - pow(line.dis, 2)) / line.dis;
-  By = line_y - line_x * sqrt(9 - pow(line.dis, 2)) / line.dis;
+  float Ax = line_x - line_y * sqrt(9 - pow(line.dis, 2)) / line.dis;
+  float Ay = line_y + line_x * sqrt(9 - pow(line.dis, 2)) / line.dis;
+  float Bx = line_x + line_y * sqrt(9 - pow(line.dis, 2)) / line.dis;
+  float By = line_y - line_x * sqrt(9 - pow(line.dis, 2)) / line.dis;
 
 
   //ラインの線の座標をOLEDでの座標に変換(-1~1の値を0~60の値に変換)
-  OLED_line_ax = map(Ax, 3, -3, 60, 0);  //ラインの線のA点のx座標
-  OLED_line_ay = map(Ay, 3, -3, 0, 60);  //ラインの線のA点のy座標
-  OLED_line_bx = map(Bx, 3, -3, 60, 0);  //ラインの線のB点のx座標
-  OLED_line_by = map(By, 3, -3, 0, 60);  //ラインの線のB点のy座標
+  int OLED_line_ax = map(Ax, 3, -3, 60, 0);  //ラインの線のA点のx座標
+  int OLED_line_ay = map(Ay, 3, -3, 0, 60);  //ラインの線のA点のy座標
+  int OLED_line_bx = map(Bx, 3, -3, 60, 0);  //ラインの線のB点のx座標
+  int OLED_line_by = map(By, 3, -3, 0, 60);  //ラインの線のB点のy座標
 
   if(line.LINE_on == 1){  //ラインがロボットの下にある
     //ラインの線を表示
@@ -995,10 +1084,6 @@ int oled_attack::display_Line(){
 
   //タクトスイッチが押されたら(手を離されるまで次のステートに行かせたくないため、変数aaを使っている)
   //タクトスイッチが押されたら、メニューに戻る
-
-  if(Sentor){
-    A = 0;
-  }
 }
 
 
@@ -1041,15 +1126,6 @@ int oled_attack::set_getBall_Threshold(){
 
   //タクトスイッチが押されたら(手を離されるまで次のステートに行かせたくないため、変数aaを使っている)
 //タクトスイッチが押されたら、メニューに戻る
-  if(Sentor){  //タクトスイッチが手から離れたら
-    address = 0x00;  //EEPROMのアドレスを0x00にする
-    address += sizeof(line.LINE_Level) + sizeof(RA_size) + sizeof(val_max) + sizeof(Button_selectCF);  //アドレスを次の変数のアドレスにする
-    for(int i = 0; i < 6; i++){
-      address += sizeof(check_val[i]);
-    }  
-    EEPROM.put(address, ball.get_th);  //EEPROMにラインの閾値を保存
-    A = 0;  //メニュー画面へ戻る
-  }
 
   if(Right == 1){
     if(ball.get_th < 1023){
@@ -1073,8 +1149,8 @@ int oled_attack::display_Ball(){
   display.clearDisplay();
 
   //ボールの座標をOLED用にする（無理やりint型にしてOLEDのドットに合わせる）
-  OLED_ball_x = map(ball.far * sin(radians(ball.ang)), -150, 150, 0, 60);  //
-  OLED_ball_y = map(ball.far * cos(radians(ball.ang)), -150, 150, 0, 60);  //
+  int OLED_ball_x = map(ball.far * sin(radians(ball.ang)), -150, 150, 0, 60);  //
+  int OLED_ball_y = map(ball.far * cos(radians(ball.ang)), -150, 150, 0, 60);  //
 
   //ボールの位置状況マップを表示する
   display.drawCircle(32, 32, 30, WHITE);  //○ 30
@@ -1123,12 +1199,6 @@ int oled_attack::display_Ball(){
 
   //タクトスイッチが押されたら(手を離されるまで次のステートに行かせたくないため、変数aaを使っている)
   //タクトスイッチが押されたら、メニューに戻る
-  if(Sentor){
-    if(digitalRead(Tact_Switch[1]) == HIGH){  //タクトスイッチが手から離れたら
-      A = 0;  //メニュー画面へ戻る
-      aa = 0;
-    }
-  }
 }
 
 
@@ -1245,25 +1315,6 @@ int oled_attack::set_Avaliable(){
 
   //タクトスイッチが押されたら(手を離されるまで次のステートに行かせたくないため、変数aaを使っている)
   //タクトスイッチが押されたら、メニューに戻る
-  if(Sentor){  //タクトスイッチが手から離れたら
-    if(check_flag == 0){
-      if(check_select == -1 || check_select == 6){
-        A = 0;  //メニュー画面へ戻る
-      }
-      else{
-        check_flag = 1;
-      }
-    }
-    else{
-      check_flag = 0;
-      address = 0;
-      address += sizeof(line.LINE_Level) + sizeof(RA_size) + sizeof(val_max) + sizeof(Button_selectCF);  //アドレスを次の変数のアドレスにする
-      for(int i = 0; i < check_select; i++){
-        address += sizeof(check_val[i]);
-      }
-      EEPROM.put(address, check_val[check_select]);  //EEPROMにボールの閾値を保存
-    }
-  }
 
   if(check_flag == 0){
     if(Left == 1){
@@ -1298,8 +1349,8 @@ int oled_attack::display_Cam(){
   display.clearDisplay();
 
   //ボールの座標をOLED用にする（無理やりint型にしてOLEDのドットに合わせる）
-  OLED_cam_x = map((80 - cam_front.Size) * sin(radians(cam_front.ang)), -80, 80, 0, 60);  //
-  OLED_cam_y = map((80 - cam_front.Size) * cos(radians(cam_front.ang)), -80, 80, 0, 60);  //
+  int OLED_cam_x = map((80 - cam_front.Size) * sin(radians(cam_front.ang)), -80, 80, 0, 60);  //
+  int OLED_cam_y = map((80 - cam_front.Size) * cos(radians(cam_front.ang)), -80, 80, 0, 60);  //
 
   //ボールの位置状況マップを表示する
   display.drawCircle(32, 32, 30, WHITE);  //○ 30
@@ -1350,10 +1401,6 @@ int oled_attack::display_Cam(){
 
   //タクトスイッチが押されたら(手を離されるまで次のステートに行かせたくないため、変数aaを使っている)
   //タクトスイッチが押されたら、メニューに戻る
-  if(Sentor){  //タクトスイッチが手から離れたら
-    A = 0;  //メニュー画面へ戻る
-    aa = 0;
-  }
 }
 
 
@@ -1422,10 +1469,6 @@ int oled_attack::display_getBall(){
 
   //タクトスイッチが押されたら(手を離されるまで次のステートに行かせたくないため、変数aaを使っている)
   //タクトスイッチが押されたら、メニューに戻る
-  if(Sentor){  //タクトスイッチが手から離れたら
-    A = 0;  //メニュー画面へ戻る
-    aa = 0;
-  }
 }
 
 
@@ -1439,14 +1482,4 @@ int oled_attack::Kick_test(){
   display.setTextColor(WHITE);
   display.setCursor(22,0);
   display.println("Kick");
-  if(digitalRead(Toggle_Switch) != toogle)  //
-  {
-    toogle = digitalRead(Toggle_Switch);
-    kick_ = 1;
-  }
-  kicker.run(kick_);
-  if(Sentor){
-    A = 0;
-    kicker.stop();
-  }
 }
