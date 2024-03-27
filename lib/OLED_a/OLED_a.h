@@ -47,21 +47,21 @@ class oled_attack{
     void OLED();
     void start();
     void end();
-    int display_main();
-    int display_start();
-    int display_selectColor();
-    int display_waitStart();
-    int set_Line_Threshold();
-    int display_Line();
-    int set_getBall_Threshold();
-    int display_Ball();
-    int set_MotorVal();
-    int set_Avaliable();
-    int display_Cam();
-    int display_getBall();
-    int Kick_test();
+    void display_main();
+    void display_start();
+    void display_selectColor();
+    void display_waitStart();
+    void set_Line_Threshold();
+    void display_Line();
+    void set_getBall_Threshold();
+    void display_Ball();
+    void set_MotorVal();
+    void set_Avaliable();
+    void display_Cam();
+    void display_getBall();
+    void Kick_test();
 
-    int check_TactSwitch();
+    void check_TactSwitch();
     int Button_selectCF = 0;  //コートの方向を決めるときに特殊なことをするので、セレクト変数を変えときますぜよ
     int Sentor_A = 0;
     int Left_A = 0;

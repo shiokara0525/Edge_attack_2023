@@ -294,7 +294,7 @@ void oled_attack::OLED() {
 
 
 
-int oled_attack::check_TactSwitch(){
+void oled_attack::check_TactSwitch(){
   if(Left_A == 0){
     if(digitalRead(Tact_Switch[0]) == LOW){
       Left_A = 1;
@@ -400,7 +400,7 @@ int oled_attack::check_TactSwitch(){
 
 
 
-int oled_attack::display_main(){
+void oled_attack::display_main(){
   display.display();
   // Serial.print(" Cat0.5 ");
   display.clearDisplay();
@@ -719,7 +719,7 @@ int oled_attack::display_main(){
 
 
 
-int oled_attack::display_start(){
+void oled_attack::display_start(){
   //OLEDの初期化
   display.display();
   display.clearDisplay();
@@ -776,7 +776,7 @@ int oled_attack::display_start(){
 
 
 
-int oled_attack::display_selectColor(){
+void oled_attack::display_selectColor(){
   display.display();
   display.clearDisplay();
 
@@ -841,7 +841,7 @@ int oled_attack::display_selectColor(){
 
 
 
-int oled_attack::display_waitStart(){
+void oled_attack::display_waitStart(){
   //OLEDの初期化
   display.display();
   display.clearDisplay();
@@ -915,7 +915,7 @@ int oled_attack::display_waitStart(){
 
 
 
-int oled_attack::set_MotorVal(){
+void oled_attack::set_MotorVal(){
   display.display();
   display.clearDisplay();
 
@@ -968,7 +968,7 @@ int oled_attack::set_MotorVal(){
 
 
 
-int oled_attack::set_Line_Threshold(){
+void oled_attack::set_Line_Threshold(){
   display.display();
   display.clearDisplay();
 
@@ -1021,7 +1021,7 @@ int oled_attack::set_Line_Threshold(){
 
 
 
-int oled_attack::display_Line(){
+void oled_attack::display_Line(){
   display.display();
   display.clearDisplay();
   line.getLINE_Vec();
@@ -1088,7 +1088,7 @@ int oled_attack::display_Line(){
 
 
 
-int oled_attack::set_getBall_Threshold(){
+void oled_attack::set_getBall_Threshold(){
   display.display();
   display.clearDisplay();
 
@@ -1142,7 +1142,7 @@ int oled_attack::set_getBall_Threshold(){
 
 
 
-int oled_attack::display_Ball(){
+void oled_attack::display_Ball(){
   ball.getBallposition();
 
   display.display();
@@ -1204,7 +1204,7 @@ int oled_attack::display_Ball(){
 
 
 
-int oled_attack::set_Avaliable(){
+void oled_attack::set_Avaliable(){
   //OLEDの初期化
   display.display();
   display.clearDisplay();
@@ -1342,7 +1342,7 @@ int oled_attack::set_Avaliable(){
 
 
 
-int oled_attack::display_Cam(){
+void oled_attack::display_Cam(){
   cam_front.getCamdata();
 
   display.display();
@@ -1405,7 +1405,7 @@ int oled_attack::display_Cam(){
 
 
 
-int oled_attack::display_getBall(){
+void oled_attack::display_getBall(){
   ball.getBallposition();
   display.display();
   display.clearDisplay();
@@ -1473,8 +1473,7 @@ int oled_attack::display_getBall(){
 
 
 
-int oled_attack::Kick_test(){
-  int kick_ = 0;
+void oled_attack::Kick_test(){
   display.display();
   display.clearDisplay();
 
